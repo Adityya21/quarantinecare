@@ -22,7 +22,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "QuarantineCare — Ward Board & Clinical Tracking",
+  title: "QuarantineCare - Measured. Seen. Home.",
   description:
     "74-room quarantine ward floor plan, daily temperature & doctor visit sequencing, discharge readiness, and outcomes benchmarking.",
 };
