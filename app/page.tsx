@@ -1,69 +1,74 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import React from 'react';
+import { useRouter } from 'next/navigation';
+import { useApp } from '@/app/lib/context';
+import type { Role } from '@/app/lib/types';
+
+const roles: { role: Role; emoji: string; title: string; description: string }[] = [
+  {
+    role: 'nurse',
+    emoji: '👩‍⚕️',
+    title: 'Nurse',
+    description: 'Record daily patient temperatures, monitor fever status, and track pending readings across all rooms.',
+  },
+  {
+    role: 'doctor',
+    emoji: '🩺',
+    title: 'Doctor',
+    description: 'Conduct daily patient visits, confirm discharge eligibility, record outcomes, and review clinical data.',
+  },
+  {
+    role: 'admin',
+    emoji: '🏥',
+    title: 'Administrator',
+    description: 'Execute patient discharges, view facility outcomes, review the audit log, and manage facility operations.',
+  },
+];
+
+export default function RoleSelectPage() {
+  const router = useRouter();
+  const { setRole, resetData } = useApp();
+
+  const handleSelectRole = (role: Role) => {
+    setRole(role);
+    router.push('/dashboard');
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
+      <div className="text-center mb-10">
+        <h1 className="text-4xl font-bold text-teal-700 mb-2">🏥 QuarantineCare</h1>
+        <p className="text-lg text-slate-500 max-w-xl mx-auto">
+          Virus quarantine facility management system. Select your role to begin.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl w-full mb-10">
+        {roles.map(({ role, emoji, title, description }) => (
+          <button
+            key={role}
+            onClick={() => handleSelectRole(role)}
+            className="flex flex-col items-center gap-3 p-8 bg-white rounded-2xl border-2 border-slate-200 shadow-sm hover:border-teal-500 hover:shadow-lg transition-all cursor-pointer min-h-12"
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+            <span className="text-5xl">{emoji}</span>
+            <span className="text-xl font-semibold text-slate-800">{title}</span>
+            <span className="text-sm text-slate-500 text-center">{description}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="flex flex-col items-center gap-4">
+        <button
+          onClick={resetData}
+          className="px-5 py-3 min-h-12 text-sm rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
+        >
+          🔄 Reset Demo Data
+        </button>
+        <p className="text-xs text-slate-400 max-w-md text-center">
+          Note: This is a demo prototype. In production, proper authentication would be implemented.
+        </p>
+      </div>
     </div>
   );
 }
