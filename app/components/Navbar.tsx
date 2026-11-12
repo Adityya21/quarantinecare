@@ -2,167 +2,218 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useApp } from '@/app/lib/context';
 import { formatDate } from '@/app/lib/logic';
+import type { Role } from '@/app/lib/types';
 
 export default function Navbar() {
-  const router = useRouter();
-  const { role, setRole, state, temperatureUnit: tempUnit, setTemperatureUnit: setTempUnit, advanceDay, getDischargeEligible } = useApp();
+  const pathname = usePathname();
+  const {
+    role,
+    setRole,
+    state,
+    temperatureUnit,
+    setTemperatureUnit,
+    advanceDay,
+    getDischargeEligible,
+  } = useApp();
 
-  if (!role) return null;
-
+  const currentRole: Role = role ?? 'nurse';
   const eligibleCount = getDischargeEligible().length;
   const dischargeBadgeCount = Math.max(eligibleCount, state.dischargeQueue.length);
 
-  const roleBadgeColor: Record<string, string> = {
-    nurse: 'bg-emerald-100 text-emerald-800',
-    doctor: 'bg-blue-100 text-blue-800',
-    admin: 'bg-purple-100 text-purple-800',
+  const navLinkClass = (href: string) => {
+    const active = pathname === href;
+    return `px-3 py-1.5 rounded text-sm font-medium transition-colors duration-150 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-[#0f766e] ${
+      active
+        ? 'bg-[#0f766e] text-white'
+        : 'text-[#5c5b57] hover:text-[#141413] hover:bg-[#f1efe8]'
+    }`;
   };
 
-  const handleLogout = () => {
-    setRole(null);
-    router.push('/');
-  };
+  const roles: { key: Role; label: string }[] = [
+    { key: 'nurse', label: 'Nurse' },
+    { key: 'doctor', label: 'Doctor' },
+    { key: 'admin', label: 'Admin' },
+  ];
 
   return (
-    <nav className="bg-white border-b border-slate-200 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex items-center justify-between h-14 gap-3 overflow-x-auto">
-          {/* Left: brand + nav links */}
-          <div className="flex items-center gap-4 shrink-0">
-            <Link href="/dashboard" className="text-lg font-bold text-teal-700 whitespace-nowrap">
-              🏥 QuarantineCare
-            </Link>
-
-            <div className="hidden sm:flex items-center gap-1">
+    <>
+      <header className="bg-white border-b border-[#e2e0d8] sticky top-0 z-40">
+        <div className="max-w-[1440px] mx-auto px-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 py-2.5">
+            {/* Left: Brand + Desktop Nav */}
+            <div className="flex items-center gap-4">
               <Link
                 href="/dashboard"
-                className="px-3 py-2 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors"
+                className="flex items-center gap-2 text-[#141413] font-serif-heading text-xl font-semibold tracking-tight focus:outline-none focus:ring-2 focus:ring-[#0f766e] rounded px-1"
               >
-                Dashboard
+                <span className="inline-block w-2.5 h-2.5 bg-[#0f766e] rounded-xs" aria-hidden="true" />
+                <span>QuarantineCare</span>
               </Link>
 
-              {(role === 'doctor' || role === 'admin') && (
-                <Link
-                  href="/outcomes"
-                  className="px-3 py-2 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors"
-                >
-                  Outcomes
+              <nav aria-label="Primary navigation" className="hidden md:flex items-center gap-1">
+                <Link href="/dashboard" className={navLinkClass('/dashboard')}>
+                  Ward Board
                 </Link>
-              )}
 
-              {role === 'admin' && (
-                <>
-                  <Link
-                    href="/discharge"
-                    className="px-3 py-2 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors flex items-center gap-1.5"
-                  >
-                    <span>Discharge Queue</span>
-                    {dischargeBadgeCount > 0 && (
-                      <span className="px-1.5 py-0.5 text-xs font-bold rounded-full bg-teal-600 text-white">
-                        {dischargeBadgeCount}
-                      </span>
-                    )}
+                {(currentRole === 'doctor' || currentRole === 'admin') && (
+                  <Link href="/outcomes" className={navLinkClass('/outcomes')}>
+                    Outcomes
                   </Link>
-                  <Link
-                    href="/audit"
-                    className="px-3 py-2 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors"
-                  >
-                    Audit Log
-                  </Link>
-                </>
-              )}
+                )}
 
-              <Link
-                href="/submission"
-                className="px-3 py-2 rounded-md text-sm font-medium text-teal-700 bg-teal-50 hover:bg-teal-100 transition-colors"
+                {currentRole === 'admin' && (
+                  <>
+                    <Link
+                      href="/discharge"
+                      className={`${navLinkClass('/discharge')} flex items-center gap-1.5`}
+                    >
+                      <span>Discharge Queue</span>
+                      {dischargeBadgeCount > 0 && (
+                        <span className="font-mono tabular-nums px-1.5 py-0.5 text-[11px] font-bold rounded bg-[#0f766e] text-white border border-white/30">
+                          {dischargeBadgeCount}
+                        </span>
+                      )}
+                    </Link>
+                    <Link href="/audit" className={navLinkClass('/audit')}>
+                      Audit Log
+                    </Link>
+                  </>
+                )}
+
+                <Link href="/submission" className={navLinkClass('/submission')}>
+                  Submission
+                </Link>
+              </nav>
+            </div>
+
+            {/* Right: Persistent Switch Role + Demo Date + Unit Toggle */}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              {/* Switch role segmented control */}
+              <div className="flex items-center gap-1.5">
+                <span className="caption-label text-[#5c5b57] hidden xl:inline">
+                  Switch role
+                </span>
+                <div
+                  role="group"
+                  aria-label="Switch role"
+                  className="inline-flex rounded border border-[#e2e0d8] bg-[#fafaf7] p-0.5"
+                >
+                  {roles.map((r) => {
+                    const active = role === r.key;
+                    return (
+                      <button
+                        key={r.key}
+                        type="button"
+                        onClick={() => setRole(r.key)}
+                        aria-pressed={active}
+                        className={`px-2.5 py-1 text-xs font-medium rounded-xs transition-colors duration-150 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0f766e] ${
+                          active
+                            ? 'bg-[#141413] text-white'
+                            : 'text-[#5c5b57] hover:text-[#141413]'
+                        }`}
+                      >
+                        {r.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Simulated date + Demo Next Day */}
+              <div className="flex items-center gap-1.5 border-l border-[#e2e0d8] pl-2 sm:pl-3">
+                <span
+                  className="font-mono tabular-nums text-xs text-[#5c5b57] hidden sm:inline"
+                  title="Simulated facility date"
+                >
+                  {formatDate(state.currentDate)}
+                </span>
+                <button
+                  type="button"
+                  onClick={advanceDay}
+                  className="px-2.5 py-1.5 min-h-[32px] text-xs font-medium rounded border border-[#0f766e] text-[#0f766e] bg-white hover:bg-[#f0fdfa] transition-colors duration-150 cursor-pointer whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-[#0f766e]"
+                  title="Demo control: Advance simulated date by 1 day"
+                >
+                  Demo: Next Day
+                </button>
+              </div>
+
+              {/* C/F toggle */}
+              <button
+                type="button"
+                onClick={() => setTemperatureUnit(temperatureUnit === 'C' ? 'F' : 'C')}
+                aria-label={`Switch temperature unit, currently ${temperatureUnit}`}
+                className="font-mono tabular-nums px-2.5 py-1.5 min-h-[32px] text-xs font-medium rounded border border-[#e2e0d8] bg-[#fafaf7] text-[#141413] hover:bg-[#f1efe8] transition-colors duration-150 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0f766e]"
               >
-                Submission
-              </Link>
+                &deg;{temperatureUnit}
+              </button>
             </div>
           </div>
-
-          {/* Right: controls */}
-          <div className="flex items-center gap-2 shrink-0">
-            <span className={`px-2 py-1 rounded-full text-xs font-semibold capitalize ${roleBadgeColor[role]}`}>
-              {role}
-            </span>
-
-            <span className="text-xs text-slate-500 hidden md:inline whitespace-nowrap">
-              📅 {formatDate(state.currentDate)}
-            </span>
-
-            <button
-              onClick={advanceDay}
-              className="px-2 py-1 min-h-8 text-xs rounded-md bg-teal-50 text-teal-700 hover:bg-teal-100 transition-colors cursor-pointer whitespace-nowrap border border-teal-200"
-              title="Demo control: Advance simulated date by one day"
-            >
-              Demo: Next Day →
-            </button>
-
-            <button
-              onClick={() => setTempUnit(tempUnit === 'C' ? 'F' : 'C')}
-              className="px-2 py-1 min-h-8 text-xs rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
-            >
-              °{tempUnit}
-            </button>
-
-            <button
-              onClick={handleLogout}
-              className="px-2 py-1 min-h-8 text-xs rounded-md bg-red-50 text-red-600 hover:bg-red-100 transition-colors cursor-pointer"
-            >
-              Logout
-            </button>
-          </div>
         </div>
+      </header>
 
-        {/* Mobile nav links */}
-        <div className="flex sm:hidden items-center gap-1 pb-2 overflow-x-auto">
+      {/* Mobile Bottom Navigation */}
+      <nav
+        aria-label="Mobile bottom navigation"
+        className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-[#e2e0d8] flex items-center justify-around px-1 py-1.5"
+      >
+        <Link
+          href="/dashboard"
+          className={`px-2.5 py-2 rounded text-xs font-medium min-h-[40px] flex items-center ${
+            pathname === '/dashboard' ? 'text-[#0f766e] font-semibold' : 'text-[#5c5b57]'
+          }`}
+        >
+          Board
+        </Link>
+
+        {(currentRole === 'doctor' || currentRole === 'admin') && (
           <Link
-            href="/dashboard"
-            className="px-3 py-2 rounded-md text-xs font-medium text-slate-600 hover:bg-slate-100 transition-colors whitespace-nowrap"
+            href="/outcomes"
+            className={`px-2.5 py-2 rounded text-xs font-medium min-h-[40px] flex items-center ${
+              pathname === '/outcomes' ? 'text-[#0f766e] font-semibold' : 'text-[#5c5b57]'
+            }`}
           >
-            Dashboard
+            Outcomes
           </Link>
-          {(role === 'doctor' || role === 'admin') && (
+        )}
+
+        {currentRole === 'admin' && (
+          <>
             <Link
-              href="/outcomes"
-              className="px-3 py-2 rounded-md text-xs font-medium text-slate-600 hover:bg-slate-100 transition-colors whitespace-nowrap"
+              href="/discharge"
+              className={`px-2.5 py-2 rounded text-xs font-medium min-h-[40px] flex items-center gap-1 ${
+                pathname === '/discharge' ? 'text-[#0f766e] font-semibold' : 'text-[#5c5b57]'
+              }`}
             >
-              Outcomes
+              <span>Discharge</span>
+              {dischargeBadgeCount > 0 && (
+                <span className="font-mono tabular-nums px-1.5 py-0.5 text-[10px] font-bold rounded bg-[#0f766e] text-white">
+                  {dischargeBadgeCount}
+                </span>
+              )}
             </Link>
-          )}
-          {role === 'admin' && (
-            <>
-              <Link
-                href="/discharge"
-                className="px-3 py-2 rounded-md text-xs font-medium text-slate-600 hover:bg-slate-100 transition-colors whitespace-nowrap flex items-center gap-1"
-              >
-                <span>Discharge</span>
-                {dischargeBadgeCount > 0 && (
-                  <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-teal-600 text-white">
-                    {dischargeBadgeCount}
-                  </span>
-                )}
-              </Link>
-              <Link
-                href="/audit"
-                className="px-3 py-2 rounded-md text-xs font-medium text-slate-600 hover:bg-slate-100 transition-colors whitespace-nowrap"
-              >
-                Audit
-              </Link>
-            </>
-          )}
-          <Link
-            href="/submission"
-            className="px-3 py-2 rounded-md text-xs font-medium text-teal-700 bg-teal-50 hover:bg-teal-100 transition-colors whitespace-nowrap"
-          >
-            Submission
-          </Link>
-        </div>
-      </div>
-    </nav>
+            <Link
+              href="/audit"
+              className={`px-2.5 py-2 rounded text-xs font-medium min-h-[40px] flex items-center ${
+                pathname === '/audit' ? 'text-[#0f766e] font-semibold' : 'text-[#5c5b57]'
+              }`}
+            >
+              Audit
+            </Link>
+          </>
+        )}
+
+        <Link
+          href="/submission"
+          className={`px-2.5 py-2 rounded text-xs font-medium min-h-[40px] flex items-center ${
+            pathname === '/submission' ? 'text-[#0f766e] font-semibold' : 'text-[#5c5b57]'
+          }`}
+        >
+          Submission
+        </Link>
+      </nav>
+    </>
   );
 }

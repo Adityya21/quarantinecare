@@ -2,276 +2,211 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useApp } from '@/app/lib/context';
-import {
-  calculateMortalityRate,
-  calculateSuccessRate,
-  isMortalityAboveBenchmark,
-  isSmallSample,
-  MAX_CAPACITY,
-  MORTALITY_BENCHMARK,
-  SUCCESS_BENCHMARK,
-} from '@/app/lib/logic';
 import Navbar from '@/app/components/Navbar';
+import { useApp } from '@/app/lib/context';
+import { MAX_CAPACITY, SMALL_SAMPLE_THRESHOLD } from '@/app/lib/logic';
 
 export default function OutcomesPage() {
-  const { role, state, getOccupancy, getDischargeEligible } = useApp();
+  const { role, getOutcomes, getOccupancy, getDischargeEligible } = useApp();
 
-  // Access denied for nurse
   if (role === 'nurse') {
     return (
-      <>
+      <div className="min-h-screen bg-[#fafaf7] pb-20 md:pb-8">
         <Navbar />
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 max-w-md w-full text-center">
-            <div className="text-5xl mb-4">🚫</div>
-            <h1 className="text-xl font-bold text-slate-800 mb-2">Access Denied</h1>
-            <p className="text-slate-500 mb-6">
-              The Outcomes Dashboard is only accessible to doctors and administrators.
+        <main className="max-w-3xl mx-auto px-4 py-12">
+          <div className="bg-white border border-[#e2e0d8] rounded-lg p-8 space-y-3">
+            <span className="caption-label text-[#991b1b] font-semibold">Access Restricted</span>
+            <h1 className="font-serif-heading text-2xl font-semibold text-[#141413]">
+              Outcomes Dashboard is restricted to Doctor and Admin roles
+            </h1>
+            <p className="text-sm text-[#5c5b57]">
+              Use the Switch Role control in the top bar or return to the Ward Board.
             </p>
             <Link
               href="/dashboard"
-              className="inline-block px-6 py-3 bg-teal-600 text-white rounded-lg font-medium hover:bg-teal-700 transition-colors"
+              className="inline-block mt-2 px-4 py-2.5 rounded bg-[#0f766e] text-white text-sm font-medium"
             >
-              ← Back to Dashboard
+              Return to Ward Board
             </Link>
           </div>
-        </div>
-      </>
+        </main>
+      </div>
     );
   }
 
-  // Compute stats
-  const discharged = state.patients.filter((p) => p.status === 'discharged').length;
-  const deceased = state.patients.filter((p) => p.status === 'deceased').length;
-  const totalClosed = discharged + deceased;
-
-  const mortalityRate = calculateMortalityRate(discharged, deceased);
-  const successRate = calculateSuccessRate(discharged, deceased);
-  const aboveBenchmark = isMortalityAboveBenchmark(discharged, deceased);
-  const smallSample = isSmallSample(discharged, deceased);
-
+  const outcomes = getOutcomes();
   const occupancy = getOccupancy();
-  const availableBeds = MAX_CAPACITY - occupancy;
-  const eligibleCount = getDischargeEligible().length;
+  const eligible = getDischargeEligible().length;
+  const totalClosed = outcomes.discharged + outcomes.deceased;
 
-  const formatRate = (rate: number | null): string => {
-    if (rate === null) return 'N/A';
-    return `${(rate * 100).toFixed(1)}%`;
-  };
+  const mortalityPct =
+    outcomes.mortalityRate !== null ? outcomes.mortalityRate * 100 : null;
+  const successPct =
+    outcomes.successRate !== null ? outcomes.successRate * 100 : null;
+
+  // Position on 0% - 30% horizontal gauge track
+  const markerLeftPct =
+    mortalityPct !== null ? Math.min(100, Math.max(0, (mortalityPct / 30) * 100)) : 0;
 
   return (
-    <>
+    <div className="min-h-screen bg-[#fafaf7] pb-20 md:pb-8">
       <Navbar />
-      <main className="min-h-screen bg-slate-50">
-        <div className="max-w-4xl mx-auto px-4 py-6">
-          <h1 className="text-2xl font-bold text-slate-800 mb-1">Treatment Outcomes</h1>
-          <p className="text-sm text-slate-500 mb-6">
-            Performance metrics and treatment outcome analysis.
+
+      <main className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+        <header className="space-y-1">
+          <span className="caption-label text-[#5c5b57] font-semibold">
+            Clinical Performance &amp; Quality Benchmark
+          </span>
+          <h1 className="font-serif-heading text-3xl sm:text-[34px] font-semibold text-[#141413]">
+            Treatment Outcomes
+          </h1>
+          <p className="text-sm text-[#5c5b57]">
+            Comparing closed-case outcomes against the expected 15% mortality / 85% success benchmark.
           </p>
+        </header>
 
-          {/* Mortality Alert Banner */}
-          {aboveBenchmark && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-300 rounded-lg text-red-800 font-medium flex items-start gap-2">
-              <span className="text-lg">⚠️</span>
-              <span>
-                ALERT: Mortality rate ({formatRate(mortalityRate)}) exceeds the 15% benchmark. Review treatment protocols.
+        {/* Alert banner when mortality > 15% */}
+        {outcomes.isAboveBenchmark && mortalityPct !== null && (
+          <div
+            role="alert"
+            className="p-4 rounded-lg border border-[#b91c1c] bg-[#fef2f2] text-[#991b1b] text-sm"
+          >
+            <strong>Alert:</strong> Facility mortality rate (
+            <span className="font-mono tabular-nums font-bold">
+              {mortalityPct.toFixed(1)}%
+            </span>
+            ) exceeds the 15.0% expected benchmark. Review clinical protocols immediately.
+          </div>
+        )}
+
+        {/* Small sample note (< 20 closed cases) */}
+        {outcomes.isSmallSample && (
+          <div className="p-3.5 rounded-lg border border-[#e2e0d8] bg-white text-xs text-[#5c5b57]">
+            <strong>Small sample note (ASSUMPTION &lt; {SMALL_SAMPLE_THRESHOLD} cases):</strong>{' '}
+            Only{' '}
+            <span className="font-mono tabular-nums font-semibold text-[#141413]">
+              {totalClosed}
+            </span>{' '}
+            closed {totalClosed === 1 ? 'case' : 'cases'} recorded. Percentages may be statistically volatile until at least {SMALL_SAMPLE_THRESHOLD} cases close.
+          </div>
+        )}
+
+        {/* HORIZONTAL MORTALITY GAUGE (0% to 30%, tick at 15%) */}
+        <section
+          aria-label="Mortality rate gauge"
+          className="bg-white border border-[#e2e0d8] rounded-lg p-6 space-y-6"
+        >
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <div>
+              <span className="caption-label text-[#5c5b57] font-semibold block">
+                Mortality Rate vs. 15% Benchmark
               </span>
+              <p className="font-mono tabular-nums text-3xl font-bold text-[#141413] mt-1">
+                {mortalityPct !== null ? `${mortalityPct.toFixed(1)}%` : 'N/A'}
+              </p>
             </div>
-          )}
-
-          {/* ASSUMPTION: Small sample warning when closed cases < 20 */}
-          {smallSample && totalClosed > 0 && (
-            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-blue-800 text-sm flex items-start gap-2">
-              <span className="text-lg">📊</span>
-              <span>
-                Note: Only {totalClosed} closed case{totalClosed !== 1 ? 's' : ''} recorded.
-                Percentages may not be statistically reliable (small sample size &lt; 20 cases).
+            <div className="text-right">
+              <span className="caption-label text-[#5c5b57] block">
+                Success Rate (Target &ge; 85%)
               </span>
+              <p
+                className={`font-mono tabular-nums text-2xl font-bold mt-1 ${
+                  successPct === null
+                    ? 'text-[#5c5b57]'
+                    : successPct >= 85
+                    ? 'text-[#0f766e]'
+                    : 'text-[#b91c1c]'
+                }`}
+              >
+                {successPct !== null ? `${successPct.toFixed(1)}%` : 'N/A'}
+              </p>
             </div>
-          )}
-
-          {totalClosed === 0 && (
-            <div className="mb-6 p-4 bg-slate-100 border border-slate-200 rounded-lg text-slate-600 text-sm text-center">
-              No closed cases yet. Metrics will appear once patients are discharged or recorded as deceased.
-            </div>
-          )}
-
-          {/* Key Metrics Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-8">
-            <MetricCard
-              label="Total Closed"
-              value={totalClosed.toString()}
-              sublabel="discharged + deceased"
-              color="slate"
-            />
-            <MetricCard
-              label="Cured & Discharged"
-              value={discharged.toString()}
-              sublabel={totalClosed > 0 ? `${((discharged / totalClosed) * 100).toFixed(1)}%` : 'N/A'}
-              color="green"
-            />
-            <MetricCard
-              label="Deceased"
-              value={deceased.toString()}
-              sublabel={totalClosed > 0 ? `${((deceased / totalClosed) * 100).toFixed(1)}%` : 'N/A'}
-              color="red"
-            />
-            <MetricCard
-              label="Mortality Rate"
-              value={formatRate(mortalityRate)}
-              sublabel={aboveBenchmark ? '> 15% benchmark' : '≤ 15% benchmark'}
-              color={aboveBenchmark ? 'red' : 'green'}
-              highlight={aboveBenchmark}
-            />
-            <MetricCard
-              label="Success Rate"
-              value={formatRate(successRate)}
-              sublabel={successRate !== null && successRate >= SUCCESS_BENCHMARK ? '≥ 85% target' : '< 85% target'}
-              color={successRate !== null && successRate >= SUCCESS_BENCHMARK ? 'green' : 'amber'}
-            />
           </div>
 
-          {/* Current Facility Status */}
-          <section className="mb-8">
-            <h2 className="text-lg font-semibold text-slate-700 mb-3">Current Facility Status</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="bg-white rounded-xl border border-slate-200 p-4">
-                <div className="text-sm text-slate-500 mb-1">Occupied Beds</div>
-                <div className="text-2xl font-bold text-slate-800">
-                  {occupancy}<span className="text-base text-slate-400">/{MAX_CAPACITY}</span>
+          {totalClosed === 0 ? (
+            <p className="text-sm text-[#5c5b57] py-4 border-t border-[#e2e0d8]">
+              No closed cases yet. Mortality and success rates display as N/A until a patient is discharged or recorded as deceased.
+            </p>
+          ) : (
+            <div className="space-y-4 pt-2">
+              {/* Gauge Track */}
+              <div className="relative pt-6 pb-7">
+                {/* Track bar: 0% to 30% */}
+                <div className="h-2.5 w-full rounded-full bg-[#e2e0d8] relative">
+                  {/* Safe zone 0-15% (left half) */}
+                  <div className="h-full w-1/2 bg-[#e6f0e8] rounded-l-full border-r border-[#141413]" />
                 </div>
-                <div className="mt-2 w-full bg-slate-100 rounded-full h-2">
-                  <div
-                    className="bg-teal-500 h-2 rounded-full transition-all"
-                    style={{ width: `${(occupancy / MAX_CAPACITY) * 100}%` }}
-                  />
-                </div>
-              </div>
-              <div className="bg-white rounded-xl border border-slate-200 p-4">
-                <div className="text-sm text-slate-500 mb-1">Available Beds</div>
-                <div className="text-2xl font-bold text-teal-600">{availableBeds}</div>
-              </div>
-              <div className="bg-white rounded-xl border border-slate-200 p-4">
-                <div className="text-sm text-slate-500 mb-1">Eligible for Discharge</div>
-                <div className="text-2xl font-bold text-green-600">{eligibleCount}</div>
-              </div>
-            </div>
-          </section>
 
-          {/* Benchmark Comparison */}
-          <section>
-            <h2 className="text-lg font-semibold text-slate-700 mb-3">Benchmark Comparison</h2>
-            <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-5">
-              {/* Mortality Benchmark */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-slate-600">Mortality Rate</span>
-                  <div className="text-sm text-slate-500">
-                    Expected: <span className="font-semibold">{(MORTALITY_BENCHMARK * 100).toFixed(0)}%</span>
-                    {' · '}
-                    Actual:{' '}
+                {/* Fixed tick at 15% (50% of 0-30% track) */}
+                <div
+                  className="absolute top-3 left-1/2 -translate-x-1/2 flex flex-col items-center"
+                  aria-label="Expected 15% benchmark"
+                >
+                  <span className="font-mono tabular-nums text-[11px] font-semibold text-[#141413] whitespace-nowrap mb-1">
+                    Expected (15%)
+                  </span>
+                  <div className="w-[2px] h-5 bg-[#141413]" />
+                </div>
+
+                {/* Facility current rate marker */}
+                {mortalityPct !== null && (
+                  <div
+                    className="absolute top-7 -translate-x-1/2 flex flex-col items-center transition-all duration-150"
+                    style={{ left: `${markerLeftPct}%` }}
+                  >
+                    <div
+                      className={`w-4 h-4 rounded-full border-2 border-white shadow-sm ${
+                        outcomes.isAboveBenchmark ? 'bg-[#b91c1c]' : 'bg-[#0f766e]'
+                      }`}
+                    />
                     <span
-                      className={`font-semibold ${
-                        aboveBenchmark ? 'text-red-600' : 'text-green-600'
+                      className={`font-mono tabular-nums text-xs font-bold mt-1 whitespace-nowrap ${
+                        outcomes.isAboveBenchmark ? 'text-[#b91c1c]' : 'text-[#0f766e]'
                       }`}
                     >
-                      {formatRate(mortalityRate)}
+                      Facility: {mortalityPct.toFixed(1)}%
                     </span>
                   </div>
-                </div>
-                <div className="relative w-full bg-slate-100 rounded-full h-4">
-                  {/* Benchmark marker */}
-                  <div
-                    className="absolute top-0 bottom-0 w-0.5 bg-slate-400 z-10"
-                    style={{ left: `${MORTALITY_BENCHMARK * 100}%` }}
-                    title={`Benchmark: ${(MORTALITY_BENCHMARK * 100).toFixed(0)}%`}
-                  />
-                  {/* Actual bar */}
-                  <div
-                    className={`h-4 rounded-full transition-all ${
-                      aboveBenchmark ? 'bg-red-500' : 'bg-green-500'
-                    }`}
-                    style={{ width: mortalityRate !== null ? `${Math.min(mortalityRate * 100, 100)}%` : '0%' }}
-                  />
+                )}
+
+                {/* Scale labels */}
+                <div className="flex justify-between font-mono tabular-nums text-[11px] text-[#5c5b57] mt-5">
+                  <span>0%</span>
+                  <span>15%</span>
+                  <span>30%+</span>
                 </div>
               </div>
 
-              {/* Success Benchmark */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-slate-600">Success Rate</span>
-                  <div className="text-sm text-slate-500">
-                    Expected: <span className="font-semibold">{(SUCCESS_BENCHMARK * 100).toFixed(0)}%</span>
-                    {' · '}
-                    Actual:{' '}
-                    <span
-                      className={`font-semibold ${
-                        successRate !== null && successRate >= SUCCESS_BENCHMARK
-                          ? 'text-green-600'
-                          : 'text-amber-600'
-                      }`}
-                    >
-                      {formatRate(successRate)}
-                    </span>
-                  </div>
-                </div>
-                <div className="relative w-full bg-slate-100 rounded-full h-4">
-                  {/* Benchmark marker */}
-                  <div
-                    className="absolute top-0 bottom-0 w-0.5 bg-slate-400 z-10"
-                    style={{ left: `${SUCCESS_BENCHMARK * 100}%` }}
-                    title={`Benchmark: ${(SUCCESS_BENCHMARK * 100).toFixed(0)}%`}
-                  />
-                  {/* Actual bar */}
-                  <div
-                    className={`h-4 rounded-full transition-all ${
-                      successRate !== null && successRate >= SUCCESS_BENCHMARK
-                        ? 'bg-green-500'
-                        : 'bg-amber-500'
-                    }`}
-                    style={{ width: successRate !== null ? `${Math.min(successRate * 100, 100)}%` : '0%' }}
-                  />
-                </div>
-              </div>
+              {/* Simple count line */}
+              <p className="font-mono tabular-nums text-sm font-medium text-[#141413] pt-3 border-t border-[#e2e0d8]">
+                Cured {outcomes.discharged}, Deceased {outcomes.deceased}, Closed cases {totalClosed}
+              </p>
             </div>
-          </section>
-        </div>
+          )}
+        </section>
+
+        {/* Facility Bed Summary */}
+        <section className="bg-white border border-[#e2e0d8] rounded-lg p-5 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+          <div>
+            <span className="caption-label text-[#5c5b57] block">Occupied Beds</span>
+            <span className="font-mono tabular-nums text-xl font-bold text-[#141413]">
+              {occupancy} of {MAX_CAPACITY}
+            </span>
+          </div>
+          <div>
+            <span className="caption-label text-[#5c5b57] block">Available Beds</span>
+            <span className="font-mono tabular-nums text-xl font-bold text-[#0f766e]">
+              {MAX_CAPACITY - occupancy}
+            </span>
+          </div>
+          <div>
+            <span className="caption-label text-[#5c5b57] block">Eligible for Discharge</span>
+            <span className="font-mono tabular-nums text-xl font-bold text-[#141413]">
+              {eligible}
+            </span>
+          </div>
+        </section>
       </main>
-    </>
-  );
-}
-
-/* ── Metric Card ────────────────────────────────────────────────────────────── */
-
-function MetricCard({
-  label,
-  value,
-  sublabel,
-  color,
-  highlight,
-}: {
-  label: string;
-  value: string;
-  sublabel: string;
-  color: 'green' | 'red' | 'amber' | 'slate';
-  highlight?: boolean;
-}) {
-  const borderColor = highlight ? 'border-red-300' : 'border-slate-200';
-  const bgColor = highlight ? 'bg-red-50' : 'bg-white';
-
-  const valueColor: Record<string, string> = {
-    green: 'text-green-600',
-    red: 'text-red-600',
-    amber: 'text-amber-600',
-    slate: 'text-slate-800',
-  };
-
-  return (
-    <div className={`${bgColor} rounded-xl border ${borderColor} p-4`}>
-      <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">{label}</div>
-      <div className={`text-2xl font-bold ${valueColor[color]}`}>{value}</div>
-      <div className="text-xs text-slate-400 mt-1">{sublabel}</div>
     </div>
   );
 }

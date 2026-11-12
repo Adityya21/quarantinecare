@@ -9,7 +9,7 @@ export default function SubmissionPage() {
   const { role } = useApp();
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#fafaf7]">
       <Navbar />
 
       <main className="max-w-5xl mx-auto px-4 py-8 space-y-10">
@@ -80,77 +80,77 @@ export default function SubmissionPage() {
               <tbody className="divide-y divide-slate-200">
                 <tr>
                   <td className="p-3 border border-slate-200 font-medium">View 74-room grid &amp; daily status chips</td>
-                  <td className="p-3 border border-slate-200 text-center">✅</td>
-                  <td className="p-3 border border-slate-200 text-center">✅</td>
-                  <td className="p-3 border border-slate-200 text-center">✅</td>
+                  <td className="p-3 border border-slate-200 text-center">Yes</td>
+                  <td className="p-3 border border-slate-200 text-center">Yes</td>
+                  <td className="p-3 border border-slate-200 text-center">Yes</td>
                   <td className="p-3 border border-slate-200 text-center"><span className="px-2 py-0.5 rounded bg-teal-100 text-teal-800 text-xs font-semibold">MVP</span></td>
                   <td className="p-3 border border-slate-200 text-slate-600">&ldquo;no one knows which patients have had their temperatures measured, and which patients have been visited&rdquo;</td>
                 </tr>
                 <tr>
                   <td className="p-3 border border-slate-200 font-medium">Record daily temperature (with duplicate guard)</td>
-                  <td className="p-3 border border-slate-200 text-center">✅</td>
-                  <td className="p-3 border border-slate-200 text-center">⚠️ Correct only</td>
-                  <td className="p-3 border border-slate-200 text-center">⚠️ Correct only</td>
+                  <td className="p-3 border border-slate-200 text-center">Yes</td>
+                  <td className="p-3 border border-slate-200 text-center">Correct only</td>
+                  <td className="p-3 border border-slate-200 text-center">Correct only</td>
                   <td className="p-3 border border-slate-200 text-center"><span className="px-2 py-0.5 rounded bg-teal-100 text-teal-800 text-xs font-semibold">MVP</span></td>
                   <td className="p-3 border border-slate-200 text-slate-600">&ldquo;measured multiple times on the same day, and sometimes... not measured at all&rdquo;</td>
                 </tr>
                 <tr>
                   <td className="p-3 border border-slate-200 font-medium">View patient temperature history &amp; 3-day streak</td>
-                  <td className="p-3 border border-slate-200 text-center">✅</td>
-                  <td className="p-3 border border-slate-200 text-center">✅</td>
-                  <td className="p-3 border border-slate-200 text-center">✅</td>
+                  <td className="p-3 border border-slate-200 text-center">Yes</td>
+                  <td className="p-3 border border-slate-200 text-center">Yes</td>
+                  <td className="p-3 border border-slate-200 text-center">Yes</td>
                   <td className="p-3 border border-slate-200 text-center"><span className="px-2 py-0.5 rounded bg-teal-100 text-teal-800 text-xs font-semibold">MVP</span></td>
                   <td className="p-3 border border-slate-200 text-slate-600">&ldquo;doctor reviews these journals when deciding what treatment to administer&rdquo;</td>
                 </tr>
                 <tr>
                   <td className="p-3 border border-slate-200 font-medium">Record doctor visit &amp; notes (blocked if no temp)</td>
-                  <td className="p-3 border border-slate-200 text-center">❌</td>
-                  <td className="p-3 border border-slate-200 text-center">✅</td>
-                  <td className="p-3 border border-slate-200 text-center">❌</td>
+                  <td className="p-3 border border-slate-200 text-center">No</td>
+                  <td className="p-3 border border-slate-200 text-center">Yes</td>
+                  <td className="p-3 border border-slate-200 text-center">No</td>
                   <td className="p-3 border border-slate-200 text-center"><span className="px-2 py-0.5 rounded bg-teal-100 text-teal-800 text-xs font-semibold">MVP</span></td>
                   <td className="p-3 border border-slate-200 text-slate-600">&ldquo;doctor visits a patient before their temperature has been taken – doctor has to waste precious minutes&rdquo;</td>
                 </tr>
                 <tr>
                   <td className="p-3 border border-slate-200 font-medium">Auto-flag &amp; confirm discharge readiness (3+ days)</td>
-                  <td className="p-3 border border-slate-200 text-center">❌</td>
-                  <td className="p-3 border border-slate-200 text-center">✅</td>
-                  <td className="p-3 border border-slate-200 text-center">❌</td>
+                  <td className="p-3 border border-slate-200 text-center">No</td>
+                  <td className="p-3 border border-slate-200 text-center">Yes</td>
+                  <td className="p-3 border border-slate-200 text-center">No</td>
                   <td className="p-3 border border-slate-200 text-center"><span className="px-2 py-0.5 rounded bg-teal-100 text-teal-800 text-xs font-semibold">MVP</span></td>
                   <td className="p-3 border border-slate-200 text-slate-600">&ldquo;cured once they have reported 3 full days without a fever&rdquo;</td>
                 </tr>
                 <tr>
                   <td className="p-3 border border-slate-200 font-medium">Discharge queue, in-app badge &amp; execute discharge</td>
-                  <td className="p-3 border border-slate-200 text-center">❌</td>
+                  <td className="p-3 border border-slate-200 text-center">No</td>
                   <td className="p-3 border border-slate-200 text-center">View only</td>
-                  <td className="p-3 border border-slate-200 text-center">✅</td>
+                  <td className="p-3 border border-slate-200 text-center">Yes</td>
                   <td className="p-3 border border-slate-200 text-center"><span className="px-2 py-0.5 rounded bg-teal-100 text-teal-800 text-xs font-semibold">MVP</span></td>
                   <td className="p-3 border border-slate-200 text-slate-600">&ldquo;patients end up staying an extra day or two... doctors fail to promptly inform admin staff&rdquo;</td>
                 </tr>
                 <tr>
                   <td className="p-3 border border-slate-200 font-medium">Record Deceased outcome</td>
-                  <td className="p-3 border border-slate-200 text-center">❌</td>
-                  <td className="p-3 border border-slate-200 text-center">✅</td>
-                  <td className="p-3 border border-slate-200 text-center">❌</td>
+                  <td className="p-3 border border-slate-200 text-center">No</td>
+                  <td className="p-3 border border-slate-200 text-center">Yes</td>
+                  <td className="p-3 border border-slate-200 text-center">No</td>
                   <td className="p-3 border border-slate-200 text-center"><span className="px-2 py-0.5 rounded bg-teal-100 text-teal-800 text-xs font-semibold">MVP</span></td>
                   <td className="p-3 border border-slate-200 text-slate-600">&ldquo;track the quality of our treatment... mortality rate&rdquo;</td>
                 </tr>
                 <tr>
                   <td className="p-3 border border-slate-200 font-medium">Outcomes dashboard vs. 15% / 85% benchmark</td>
-                  <td className="p-3 border border-slate-200 text-center">❌</td>
-                  <td className="p-3 border border-slate-200 text-center">✅</td>
-                  <td className="p-3 border border-slate-200 text-center">✅</td>
+                  <td className="p-3 border border-slate-200 text-center">No</td>
+                  <td className="p-3 border border-slate-200 text-center">Yes</td>
+                  <td className="p-3 border border-slate-200 text-center">Yes</td>
                   <td className="p-3 border border-slate-200 text-center"><span className="px-2 py-0.5 rounded bg-teal-100 text-teal-800 text-xs font-semibold">MVP</span></td>
                   <td className="p-3 border border-slate-200 text-slate-600">&ldquo;no way of measuring our performance against the 85% success rate benchmark&rdquo;</td>
                 </tr>
                 <tr>
                   <td className="p-3 border border-slate-200 font-medium">Audit log of all clinical &amp; admin actions</td>
-                  <td className="p-3 border border-slate-200 text-center">❌</td>
-                  <td className="p-3 border border-slate-200 text-center">❌</td>
-                  <td className="p-3 border border-slate-200 text-center">✅</td>
+                  <td className="p-3 border border-slate-200 text-center">No</td>
+                  <td className="p-3 border border-slate-200 text-center">No</td>
+                  <td className="p-3 border border-slate-200 text-center">Yes</td>
                   <td className="p-3 border border-slate-200 text-center"><span className="px-2 py-0.5 rounded bg-teal-100 text-teal-800 text-xs font-semibold">MVP</span></td>
                   <td className="p-3 border border-slate-200 text-slate-600">Accountability for temperature corrections, discharges, and outcomes</td>
                 </tr>
-                <tr className="bg-slate-50">
+                <tr className="bg-[#fafaf7]">
                   <td className="p-3 border border-slate-200 font-medium">Real authentication &amp; SSO / RBAC</td>
                   <td className="p-3 border border-slate-200 text-center">All</td>
                   <td className="p-3 border border-slate-200 text-center">All</td>
@@ -158,19 +158,19 @@ export default function SubmissionPage() {
                   <td className="p-3 border border-slate-200 text-center"><span className="px-2 py-0.5 rounded bg-slate-200 text-slate-700 text-xs font-semibold">Later</span></td>
                   <td className="p-3 border border-slate-200 text-slate-600">Production security; MVP uses a simple role picker to ship ASAP</td>
                 </tr>
-                <tr className="bg-slate-50">
+                <tr className="bg-[#fafaf7]">
                   <td className="p-3 border border-slate-200 font-medium">SMS / push alerts for discharge &amp; high mortality</td>
                   <td className="p-3 border border-slate-200 text-center">—</td>
-                  <td className="p-3 border border-slate-200 text-center">✅</td>
-                  <td className="p-3 border border-slate-200 text-center">✅</td>
+                  <td className="p-3 border border-slate-200 text-center">Yes</td>
+                  <td className="p-3 border border-slate-200 text-center">Yes</td>
                   <td className="p-3 border border-slate-200 text-center"><span className="px-2 py-0.5 rounded bg-slate-200 text-slate-700 text-xs font-semibold">Later</span></td>
                   <td className="p-3 border border-slate-200 text-slate-600">Nice-to-have escalation; MVP uses in-app badge &amp; banner</td>
                 </tr>
-                <tr className="bg-slate-50">
+                <tr className="bg-[#fafaf7]">
                   <td className="p-3 border border-slate-200 font-medium">Staff shift scheduling &amp; workload balancing</td>
-                  <td className="p-3 border border-slate-200 text-center">✅</td>
-                  <td className="p-3 border border-slate-200 text-center">✅</td>
-                  <td className="p-3 border border-slate-200 text-center">✅</td>
+                  <td className="p-3 border border-slate-200 text-center">Yes</td>
+                  <td className="p-3 border border-slate-200 text-center">Yes</td>
+                  <td className="p-3 border border-slate-200 text-center">Yes</td>
                   <td className="p-3 border border-slate-200 text-center"><span className="px-2 py-0.5 rounded bg-slate-200 text-slate-700 text-xs font-semibold">Later</span></td>
                   <td className="p-3 border border-slate-200 text-slate-600">Addresses &ldquo;understaffed&rdquo; long-term; nice-to-have after core tracking</td>
                 </tr>
@@ -186,7 +186,7 @@ export default function SubmissionPage() {
           </h2>
 
           <div className="grid md:grid-cols-2 gap-4 text-sm">
-            <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
+            <div className="p-4 rounded-lg bg-[#fafaf7] border border-slate-200 space-y-2">
               <h3 className="font-bold text-slate-800">Screen-by-Screen Flow</h3>
               <ol className="list-decimal list-inside space-y-1.5 text-slate-700">
                 <li><strong>Role Select (<code>/</code>):</strong> User picks Nurse, Doctor, or Admin.</li>
@@ -200,7 +200,7 @@ export default function SubmissionPage() {
               </ol>
             </div>
 
-            <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
+            <div className="p-4 rounded-lg bg-[#fafaf7] border border-slate-200 space-y-2">
               <h3 className="font-bold text-slate-800">Core Feature Workflows</h3>
               <ul className="space-y-2 text-slate-700">
                 <li><strong>Temperature Recording:</strong> Nurse filters &ldquo;Awaiting Temperature&rdquo; &rarr; taps room &rarr; enters temp &rarr; system validates range &amp; checks for today&apos;s duplicate &rarr; saves in °C, updates chip to green, recalculates streak &amp; eligibility.</li>
@@ -340,14 +340,14 @@ export default function SubmissionPage() {
                     { f: 'C', p: 'High', v: 6, e: 5.0, r: '1.20', s: false },
                     { f: 'E', p: 'Medium', v: 3, e: 3.0, r: '1.00', s: false },
                   ].map((row) => (
-                    <tr key={row.f} className={row.s ? 'bg-teal-50/40' : 'bg-slate-50 text-slate-500'}>
+                    <tr key={row.f} className={row.s ? 'bg-teal-50/40' : 'bg-[#fafaf7] text-slate-500'}>
                       <td className="p-2.5 border border-slate-200 font-bold">{row.f}</td>
                       <td className="p-2.5 border border-slate-200">{row.p}</td>
                       <td className="p-2.5 border border-slate-200 text-right">{row.v}</td>
                       <td className="p-2.5 border border-slate-200 text-right">{row.e}</td>
                       <td className="p-2.5 border border-slate-200 text-right font-mono">{row.r}</td>
                       <td className="p-2.5 border border-slate-200 text-center font-semibold">
-                        {row.s ? '✅ Yes' : '❌ No'}
+                        {row.s ? 'Yes Yes' : 'No No'}
                       </td>
                     </tr>
                   ))}

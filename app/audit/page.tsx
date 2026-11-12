@@ -2,255 +2,171 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { useApp } from '@/app/lib/context';
 import Navbar from '@/app/components/Navbar';
+import { useApp } from '@/app/lib/context';
 import type { AuditLogEntry } from '@/app/lib/types';
 
-const ACTION_LABELS: Record<AuditLogEntry['action'], string> = {
+const actionLabels: Record<AuditLogEntry['action'], string> = {
   temperature_recorded: 'Temp Recorded',
   temperature_corrected: 'Temp Corrected',
-  visit_recorded: 'Visit Recorded',
+  visit_recorded: 'Visit Logged',
   discharge_confirmed: 'Discharge Confirmed',
   discharge_executed: 'Discharge Executed',
   deceased_recorded: 'Deceased Recorded',
 };
 
-const ACTION_COLORS: Record<AuditLogEntry['action'], string> = {
-  temperature_recorded: 'bg-green-100 text-green-700',
-  temperature_corrected: 'bg-orange-100 text-orange-700',
-  visit_recorded: 'bg-blue-100 text-blue-700',
-  discharge_confirmed: 'bg-purple-100 text-purple-700',
-  discharge_executed: 'bg-purple-100 text-purple-700',
-  deceased_recorded: 'bg-red-100 text-red-700',
-};
-
-const ROLE_COLORS: Record<string, string> = {
-  nurse: 'bg-emerald-100 text-emerald-700',
-  doctor: 'bg-blue-100 text-blue-700',
-  admin: 'bg-purple-100 text-purple-700',
-};
-
-function formatTimestamp(iso: string): string {
-  try {
-    const d = new Date(iso);
-    return d.toLocaleString('en-IN', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    });
-  } catch {
-    return iso;
-  }
-}
-
-export default function AuditPage() {
+export default function AuditLogPage() {
   const { role, state } = useApp();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [search, setSearch] = useState('');
   const [actionFilter, setActionFilter] = useState<string>('all');
 
-  // Access denied for non-admin
+  const entries = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return [...state.auditLog]
+      .reverse()
+      .filter((entry) => {
+        if (actionFilter !== 'all' && entry.action !== actionFilter) return false;
+        if (
+          q &&
+          !entry.patientName.toLowerCase().includes(q) &&
+          !String(entry.roomNumber).includes(q) &&
+          !entry.details.toLowerCase().includes(q)
+        ) {
+          return false;
+        }
+        return true;
+      });
+  }, [state.auditLog, search, actionFilter]);
+
   if (role !== 'admin') {
     return (
-      <>
+      <div className="min-h-screen bg-[#fafaf7] pb-20 md:pb-8">
         <Navbar />
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 max-w-md w-full text-center">
-            <div className="text-5xl mb-4">🚫</div>
-            <h1 className="text-xl font-bold text-slate-800 mb-2">Access Denied</h1>
-            <p className="text-slate-500 mb-6">
-              The Audit Log is only accessible to administrators.
+        <main className="max-w-3xl mx-auto px-4 py-12">
+          <div className="bg-white border border-[#e2e0d8] rounded-lg p-8 space-y-3">
+            <span className="caption-label text-[#991b1b] font-semibold">Access Restricted</span>
+            <h1 className="font-serif-heading text-2xl font-semibold text-[#141413]">
+              Audit Log is restricted to Admin staff
+            </h1>
+            <p className="text-sm text-[#5c5b57]">
+              Use the Switch Role control in the top bar to switch to Admin or return to the Ward Board.
             </p>
             <Link
               href="/dashboard"
-              className="inline-block px-6 py-3 bg-teal-600 text-white rounded-lg font-medium hover:bg-teal-700 transition-colors"
+              className="inline-block mt-2 px-4 py-2.5 rounded bg-[#0f766e] text-white text-sm font-medium"
             >
-              ← Back to Dashboard
+              Return to Ward Board
             </Link>
           </div>
-        </div>
-      </>
+        </main>
+      </div>
     );
   }
 
-  // Filter and sort entries (newest first)
-  const filteredEntries = useMemo(() => {
-    let entries = [...state.auditLog];
-
-    // Filter by search query (patient name)
-    if (searchQuery.trim()) {
-      const q = searchQuery.trim().toLowerCase();
-      entries = entries.filter(
-        (e) =>
-          e.patientName.toLowerCase().includes(q) ||
-          e.performedBy.toLowerCase().includes(q)
-      );
-    }
-
-    // Filter by action type
-    if (actionFilter !== 'all') {
-      entries = entries.filter((e) => e.action === actionFilter);
-    }
-
-    // Sort newest first
-    entries.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-
-    return entries;
-  }, [state.auditLog, searchQuery, actionFilter]);
-
-  const actionTypes = Array.from(new Set(state.auditLog.map((e) => e.action)));
-
   return (
-    <>
+    <div className="min-h-screen bg-[#fafaf7] pb-20 md:pb-8">
       <Navbar />
-      <main className="min-h-screen bg-slate-50">
-        <div className="max-w-6xl mx-auto px-4 py-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
-            <div>
-              <h1 className="text-2xl font-bold text-slate-800">Audit Log</h1>
-              <p className="text-sm text-slate-500">
-                {filteredEntries.length} of {state.auditLog.length} entries
-              </p>
-            </div>
+
+      <main className="max-w-5xl mx-auto px-4 py-6 space-y-5">
+        <header className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <span className="caption-label text-[#5c5b57] font-semibold">
+              Immutable Clinical &amp; Admin Trail
+            </span>
+            <h1 className="font-serif-heading text-3xl sm:text-[34px] font-semibold text-[#141413]">
+              Audit Log
+            </h1>
           </div>
+          <span className="font-mono tabular-nums text-xs text-[#5c5b57]">
+            {entries.length} {entries.length === 1 ? 'entry' : 'entries'} shown
+          </span>
+        </header>
 
-          {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-3 mb-6">
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="Search by patient or staff name…"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-3 min-h-12 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <select
-                value={actionFilter}
-                onChange={(e) => setActionFilter(e.target.value)}
-                className="w-full sm:w-auto px-4 py-3 min-h-12 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent cursor-pointer"
-              >
-                <option value="all">All Actions</option>
-                {actionTypes.map((action) => (
-                  <option key={action} value={action}>
-                    {ACTION_LABELS[action]}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Filter by patient, room #, or details..."
+            aria-label="Filter audit log"
+            className="flex-1 px-3 py-2 min-h-[40px] rounded border border-[#e2e0d8] bg-white text-sm text-[#141413] focus:outline-none focus:ring-2 focus:ring-[#0f766e]"
+          />
+          <select
+            value={actionFilter}
+            onChange={(e) => setActionFilter(e.target.value)}
+            aria-label="Filter by action type"
+            className="px-3 py-2 min-h-[40px] rounded border border-[#e2e0d8] bg-white text-sm text-[#141413] focus:outline-none focus:ring-2 focus:ring-[#0f766e]"
+          >
+            <option value="all">All Actions</option>
+            {Object.entries(actionLabels).map(([key, label]) => (
+              <option key={key} value={key}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </div>
 
-          {/* Entries */}
-          {filteredEntries.length === 0 ? (
-            <div className="bg-white rounded-xl border border-slate-200 p-8 text-center text-slate-400">
-              {state.auditLog.length === 0
-                ? 'No audit log entries yet.'
-                : 'No entries match your filters.'}
-            </div>
-          ) : (
-            <>
-              {/* Desktop table */}
-              <div className="hidden md:block bg-white rounded-xl border border-slate-200 overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-100 bg-slate-50">
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                        Timestamp
-                      </th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                        Action
-                      </th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                        Patient
-                      </th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                        Performed By
-                      </th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                        Details
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {filteredEntries.map((entry) => (
-                      <tr key={entry.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
-                          {formatTimestamp(entry.timestamp)}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span
-                            className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${ACTION_COLORS[entry.action]}`}
-                          >
-                            {ACTION_LABELS[entry.action]}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="font-medium text-slate-800">{entry.patientName}</div>
-                          <div className="text-xs text-slate-400">Room {entry.roomNumber}</div>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-slate-700">{entry.performedBy}</span>
-                            <span
-                              className={`px-1.5 py-0.5 rounded text-[10px] font-semibold capitalize ${
-                                ROLE_COLORS[entry.performedByRole] || 'bg-slate-100 text-slate-600'
-                              }`}
-                            >
-                              {entry.performedByRole}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-slate-500 max-w-xs truncate">
-                          {entry.details}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Mobile cards */}
-              <div className="md:hidden space-y-3">
-                {filteredEntries.map((entry) => (
-                  <div
-                    key={entry.id}
-                    className="bg-white rounded-xl border border-slate-200 p-4"
-                  >
-                    <div className="flex items-center justify-between mb-2">
+        {/* Table */}
+        <div className="bg-white border border-[#e2e0d8] rounded-lg overflow-x-auto">
+          <table className="w-full text-xs sm:text-sm border-collapse">
+            <thead className="bg-[#fafaf7] border-b border-[#e2e0d8] text-[#5c5b57]">
+              <tr>
+                <th className="text-left py-3 px-3 font-semibold">Timestamp</th>
+                <th className="text-left py-3 px-3 font-semibold">Action</th>
+                <th className="text-left py-3 px-3 font-semibold">Patient / Room</th>
+                <th className="text-left py-3 px-3 font-semibold">Performed By</th>
+                <th className="text-left py-3 px-3 font-semibold">Details</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#e2e0d8]">
+              {entries.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="py-8 text-center text-[#5c5b57]">
+                    No audit entries match the current filter.
+                  </td>
+                </tr>
+              ) : (
+                entries.map((e) => (
+                  <tr key={e.id} className="hover:bg-[#fafaf7]">
+                    <td className="py-2.5 px-3 font-mono tabular-nums text-xs text-[#5c5b57] whitespace-nowrap">
+                      {new Date(e.timestamp).toLocaleString()}
+                    </td>
+                    <td className="py-2.5 px-3 whitespace-nowrap">
                       <span
-                        className={`px-2 py-0.5 rounded-full text-xs font-semibold ${ACTION_COLORS[entry.action]}`}
-                      >
-                        {ACTION_LABELS[entry.action]}
-                      </span>
-                      <span className="text-xs text-slate-400">
-                        {formatTimestamp(entry.timestamp)}
-                      </span>
-                    </div>
-                    <div className="text-sm font-medium text-slate-800">
-                      {entry.patientName}
-                      <span className="text-slate-400 font-normal"> · Room {entry.roomNumber}</span>
-                    </div>
-                    <div className="text-xs text-slate-500 mt-1 flex items-center gap-1">
-                      By {entry.performedBy}
-                      <span
-                        className={`px-1.5 py-0.5 rounded text-[10px] font-semibold capitalize ${
-                          ROLE_COLORS[entry.performedByRole] || 'bg-slate-100 text-slate-600'
+                        className={`px-2 py-0.5 rounded border text-xs font-medium ${
+                          e.action === 'deceased_recorded'
+                            ? 'border-[#b91c1c] bg-[#fef2f2] text-[#991b1b]'
+                            : e.action === 'temperature_corrected'
+                            ? 'border-[#d97706] bg-[#fffbeb] text-[#92400e]'
+                            : e.action === 'discharge_executed' || e.action === 'discharge_confirmed'
+                            ? 'border-[#0f766e] bg-[#f0fdfa] text-[#0f766e]'
+                            : 'border-[#e2e0d8] bg-[#fafaf7] text-[#141413]'
                         }`}
                       >
-                        {entry.performedByRole}
+                        {actionLabels[e.action]}
                       </span>
-                    </div>
-                    <div className="text-xs text-slate-400 mt-2">{entry.details}</div>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
+                    </td>
+                    <td className="py-2.5 px-3 whitespace-nowrap">
+                      <span className="font-mono tabular-nums text-xs text-[#5c5b57] mr-1.5">
+                        R{String(e.roomNumber).padStart(2, '0')}
+                      </span>
+                      <span className="font-medium text-[#141413]">{e.patientName}</span>
+                    </td>
+                    <td className="py-2.5 px-3 whitespace-nowrap text-[#5c5b57]">
+                      {e.performedBy}{' '}
+                      <span className="uppercase text-[10px] tracking-wider">
+                        ({e.performedByRole})
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-3 text-[#141413]">{e.details}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </main>
-    </>
+    </div>
   );
 }

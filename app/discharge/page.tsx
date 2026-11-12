@@ -2,182 +2,196 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Navbar from '@/app/components/Navbar';
+import Toast, { type ToastMessage } from '@/app/components/Toast';
 import { useApp } from '@/app/lib/context';
 import { calculateFeverFreeStreak } from '@/app/lib/logic';
-import Navbar from '@/app/components/Navbar';
 
-export default function DischargePage() {
-  const { role, state, getDischargeEligible, getPatientReadings, executeDischarge } = useApp();
-  const [processing, setProcessing] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+export default function DischargeQueuePage() {
+  const {
+    role,
+    state,
+    getPatientReadings,
+    getDischargeEligible,
+    executeDischarge,
+  } = useApp();
 
-  // Access denied for non-admin
+  const [toast, setToast] = useState<ToastMessage | null>(null);
+
+  const notify = (text: string, tone: 'neutral' | 'success' | 'error' = 'neutral') => {
+    const id = Date.now().toString();
+    setToast({ id, text, tone });
+    setTimeout(() => {
+      setToast((prev) => (prev?.id === id ? null : prev));
+    }, 3000);
+  };
+
   if (role !== 'admin') {
     return (
-      <>
+      <div className="min-h-screen bg-[#fafaf7] pb-20 md:pb-8">
         <Navbar />
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 max-w-md w-full text-center">
-            <div className="text-5xl mb-4">🚫</div>
-            <h1 className="text-xl font-bold text-slate-800 mb-2">Access Denied</h1>
-            <p className="text-slate-500 mb-6">
-              The Discharge Queue is only accessible to administrators.
+        <main className="max-w-3xl mx-auto px-4 py-12">
+          <div className="bg-white border border-[#e2e0d8] rounded-lg p-8 space-y-3">
+            <span className="caption-label text-[#991b1b] font-semibold">Access Restricted</span>
+            <h1 className="font-serif-heading text-2xl font-semibold text-[#141413]">
+              Discharge Queue is restricted to Admin staff
+            </h1>
+            <p className="text-sm text-[#5c5b57]">
+              Use the Switch Role control in the top bar to switch to Admin or return to the Ward Board.
             </p>
             <Link
               href="/dashboard"
-              className="inline-block px-6 py-3 bg-teal-600 text-white rounded-lg font-medium hover:bg-teal-700 transition-colors"
+              className="inline-block mt-2 px-4 py-2.5 rounded bg-[#0f766e] text-white text-sm font-medium"
             >
-              ← Back to Dashboard
+              Return to Ward Board
             </Link>
           </div>
-        </div>
-      </>
+        </main>
+      </div>
     );
   }
 
-  // Patients confirmed by doctor (in dischargeQueue)
-  const confirmedPatients = state.dischargeQueue
-    .map((pid) => state.patients.find((p) => p.id === pid))
-    .filter((p) => p && p.status === 'admitted');
-
-  // Patients eligible for discharge but NOT yet confirmed
-  const eligiblePatients = getDischargeEligible().filter(
-    (p) => !state.dischargeQueue.includes(p.id)
+  const confirmedPatients = state.patients.filter(
+    (p) => p.status === 'admitted' && state.dischargeQueue.includes(p.id),
   );
 
-  const handleExecuteDischarge = (patientId: string, patientName: string) => {
-    setProcessing(patientId);
-    try {
-      executeDischarge(patientId, 'Admin');
-      setSuccessMsg(`${patientName} has been successfully discharged.`);
-      setTimeout(() => setSuccessMsg(null), 4000);
-    } catch {
-      // handle error silently
-    } finally {
-      setProcessing(null);
+  const eligibleUnconfirmed = getDischargeEligible().filter(
+    (p) => !state.dischargeQueue.includes(p.id),
+  );
+
+  const handleDischarge = (patientId: string, name: string, roomNumber: number) => {
+    const res = executeDischarge(patientId, 'Admin Staff');
+    if (res.success) {
+      notify(`Discharged ${name} from Room ${roomNumber}. Room is now vacant.`, 'success');
+    } else {
+      notify(res.error ?? 'Could not execute discharge.', 'error');
     }
   };
 
   return (
-    <>
+    <div className="min-h-screen bg-[#fafaf7] pb-20 md:pb-8">
       <Navbar />
-      <main className="min-h-screen bg-slate-50">
-        <div className="max-w-4xl mx-auto px-4 py-6">
-          <h1 className="text-2xl font-bold text-slate-800 mb-1">Discharge Queue</h1>
-          <p className="text-sm text-slate-500 mb-6">
-            Manage patient discharges. Only patients confirmed by a doctor can be discharged.
-          </p>
 
-          {/* Success notification */}
-          {successMsg && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm font-medium flex items-center gap-2">
-              <span>✅</span> {successMsg}
+      <main className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+        <header className="space-y-1">
+          <span className="caption-label text-[#5c5b57] font-semibold">
+            Bed Turnover &amp; Patient Release
+          </span>
+          <h1 className="font-serif-heading text-3xl sm:text-[34px] font-semibold text-[#141413]">
+            Discharge Queue
+          </h1>
+          <p className="text-sm text-[#5c5b57]">
+            Admin executes discharge for patients confirmed by a Doctor after 3 consecutive fever-free days.
+          </p>
+        </header>
+
+        {/* Section 1: Confirmed by Doctor */}
+        <section className="bg-white border border-[#e2e0d8] rounded-lg overflow-hidden">
+          <div className="px-5 py-3.5 border-b border-[#e2e0d8] flex items-center justify-between bg-[#fafaf7]">
+            <h2 className="text-sm font-semibold text-[#141413]">
+              Confirmed by Doctor — Ready to Discharge
+            </h2>
+            <span className="font-mono tabular-nums text-xs font-bold px-2 py-0.5 rounded bg-[#0f766e] text-white">
+              {confirmedPatients.length}
+            </span>
+          </div>
+
+          {confirmedPatients.length === 0 ? (
+            <p className="p-5 text-sm text-[#5c5b57]">
+              No doctor-confirmed patients are currently waiting for discharge execution.
+            </p>
+          ) : (
+            <div className="divide-y divide-[#e2e0d8]">
+              {confirmedPatients.map((p) => {
+                const streak = calculateFeverFreeStreak(
+                  getPatientReadings(p.id),
+                  state.currentDate,
+                );
+                return (
+                  <div
+                    key={p.id}
+                    className="p-4 flex flex-wrap items-center justify-between gap-3"
+                  >
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono tabular-nums text-xs font-semibold px-2 py-0.5 rounded border border-[#e2e0d8] bg-[#fafaf7]">
+                          Room {String(p.roomNumber).padStart(2, '0')}
+                        </span>
+                        <span className="font-semibold text-[#141413] text-sm">
+                          {p.name}
+                        </span>
+                      </div>
+                      <p className="text-xs text-[#5c5b57] font-mono tabular-nums mt-1">
+                        Fever-free streak: {streak} days • Confirmed by Doctor
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDischarge(p.id, p.name, p.roomNumber)}
+                      className="px-4 py-2.5 min-h-[42px] rounded bg-[#0f766e] text-white text-sm font-semibold hover:bg-[#0d625b] transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0f766e]"
+                    >
+                      Execute Discharge
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
+        </section>
 
-          {/* Section 1: Confirmed – Ready for Discharge */}
-          <section className="mb-8">
-            <h2 className="text-lg font-semibold text-slate-700 mb-3 flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-green-500 inline-block" />
-              Confirmed by Doctor — Ready for Discharge
+        {/* Section 2: Eligible but awaiting Doctor confirmation */}
+        <section className="bg-white border border-[#e2e0d8] rounded-lg overflow-hidden">
+          <div className="px-5 py-3.5 border-b border-[#e2e0d8] flex items-center justify-between bg-[#fafaf7]">
+            <h2 className="text-sm font-semibold text-[#141413]">
+              Eligible (3+ Clear Days) — Awaiting Doctor Confirmation
             </h2>
-
-            {confirmedPatients.length === 0 ? (
-              <div className="bg-white rounded-xl border border-slate-200 p-6 text-center text-slate-400">
-                No patients are currently confirmed for discharge.
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {confirmedPatients.map((patient) => {
-                  if (!patient) return null;
-                  const readings = getPatientReadings(patient.id);
-                  const streak = calculateFeverFreeStreak(readings, state.currentDate);
-
-                  return (
-                    <div
-                      key={patient.id}
-                      className="bg-white rounded-xl border border-slate-200 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                    >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-xs font-mono bg-teal-50 text-teal-700 px-2 py-0.5 rounded">
-                            Room {patient.roomNumber}
-                          </span>
-                          <span className="font-semibold text-slate-800">{patient.name}</span>
-                          <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
-                            ✓ Doctor Confirmed
-                          </span>
-                        </div>
-                        <div className="mt-1 text-sm text-slate-500">
-                          Fever-free streak: <span className="font-semibold text-green-600">{streak} days</span>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => handleExecuteDischarge(patient.id, patient.name)}
-                        disabled={processing === patient.id}
-                        className="px-5 py-3 min-h-12 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer text-sm whitespace-nowrap"
-                      >
-                        {processing === patient.id ? 'Processing…' : 'Execute Discharge'}
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </section>
-
-          {/* Section 2: Eligible but Not Yet Confirmed */}
-          <section>
-            <h2 className="text-lg font-semibold text-slate-700 mb-3 flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-amber-400 inline-block" />
-              Eligible but Not Yet Confirmed
-            </h2>
-
-            {eligiblePatients.length === 0 ? (
-              <div className="bg-white rounded-xl border border-slate-200 p-6 text-center text-slate-400">
-                No additional patients are currently eligible for discharge.
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {eligiblePatients.map((patient) => {
-                  const readings = getPatientReadings(patient.id);
-                  const streak = calculateFeverFreeStreak(readings, state.currentDate);
-
-                  return (
-                    <div
-                      key={patient.id}
-                      className="bg-white rounded-xl border border-slate-200 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                    >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-xs font-mono bg-teal-50 text-teal-700 px-2 py-0.5 rounded">
-                            Room {patient.roomNumber}
-                          </span>
-                          <span className="font-semibold text-slate-800">{patient.name}</span>
-                          <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
-                            ⏳ Awaiting Doctor Confirmation
-                          </span>
-                        </div>
-                        <div className="mt-1 text-sm text-slate-500">
-                          Fever-free streak: <span className="font-semibold text-green-600">{streak} days</span>
-                        </div>
-                      </div>
-                      <div className="text-xs text-slate-400 italic">
-                        Requires doctor visit with discharge confirmation
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </section>
-
-          {/* Summary */}
-          <div className="mt-8 p-4 bg-slate-100 rounded-lg text-sm text-slate-500 text-center">
-            {confirmedPatients.length} ready for discharge · {eligiblePatients.length} awaiting confirmation
+            <span className="font-mono tabular-nums text-xs font-semibold px-2 py-0.5 rounded border border-[#e2e0d8] bg-white text-[#141413]">
+              {eligibleUnconfirmed.length}
+            </span>
           </div>
-        </div>
+
+          {eligibleUnconfirmed.length === 0 ? (
+            <p className="p-5 text-sm text-[#5c5b57]">
+              All discharge-eligible patients have already been confirmed by a Doctor.
+            </p>
+          ) : (
+            <div className="divide-y divide-[#e2e0d8]">
+              {eligibleUnconfirmed.map((p) => {
+                const streak = calculateFeverFreeStreak(
+                  getPatientReadings(p.id),
+                  state.currentDate,
+                );
+                return (
+                  <div
+                    key={p.id}
+                    className="p-4 flex flex-wrap items-center justify-between gap-3"
+                  >
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono tabular-nums text-xs font-semibold px-2 py-0.5 rounded border border-[#e2e0d8] bg-[#fafaf7]">
+                          Room {String(p.roomNumber).padStart(2, '0')}
+                        </span>
+                        <span className="font-semibold text-[#141413] text-sm">
+                          {p.name}
+                        </span>
+                      </div>
+                      <p className="text-xs text-[#5c5b57] font-mono tabular-nums mt-1">
+                        Fever-free streak: {streak} days
+                      </p>
+                    </div>
+                    <span className="text-xs font-medium px-2.5 py-1 rounded border border-[#e2e0d8] bg-[#fafaf7] text-[#5c5b57]">
+                      Awaiting Doctor Confirmation
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
       </main>
-    </>
+
+      <Toast toast={toast} onDismiss={() => setToast(null)} />
+    </div>
   );
 }
