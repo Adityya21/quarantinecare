@@ -31,7 +31,7 @@ import {
   isSmallSample as isSmallSampleFn,
 } from './logic';
 
-import { generateSeedData } from './seed';
+import { generateSeedData, generateScenarioData, type ScenarioId } from './seed';
 
 // ──────────────────────────────────────────────────────────────────────────────
 // localStorage helpers (SSR-safe)
@@ -120,8 +120,9 @@ interface AppContextValue {
     doctorName: string,
   ) => { success: boolean; error?: string };
 
-  // Reset
+  // Reset & Demo Scenarios
   resetData: () => void;
+  loadScenario: (scenario: ScenarioId) => void;
 
   // Queries
   getPatientReadings: (patientId: string) => TemperatureReading[];
@@ -245,8 +246,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       correctorRole: Role,
       reason: string,
     ): { success: boolean; error?: string } => {
-      if (correctorRole !== 'doctor' && correctorRole !== 'admin')
-        return { success: false, error: 'Only doctors or admins may correct temperatures.' };
+      if (correctorRole !== 'doctor')
+        return { success: false, error: 'Only a Doctor may correct a recorded temperature.' };
 
       if (!isValidTemperature(newValue))
         return {
@@ -495,6 +496,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setState(fresh);
   }, []);
 
+  const loadScenario = useCallback((scenario: ScenarioId) => {
+    const fresh = generateScenarioData(scenario);
+    saveState(fresh);
+    setState(fresh);
+  }, []);
+
   // ── Query helpers ────────────────────────────────────────────────────────
 
   const getPatientReadings = useCallback(
@@ -601,6 +608,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       executeDischarge,
       recordDeceased,
       resetData,
+      loadScenario,
       getPatientReadings,
       getPatientVisits,
       getTodayReading,
@@ -625,6 +633,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       executeDischarge,
       recordDeceased,
       resetData,
+      loadScenario,
       getPatientReadings,
       getPatientVisits,
       getTodayReading,

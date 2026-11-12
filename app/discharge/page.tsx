@@ -17,6 +17,7 @@ export default function DischargeQueuePage() {
   } = useApp();
 
   const [toast, setToast] = useState<ToastMessage | null>(null);
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
   const notify = (text: string, tone: 'neutral' | 'success' | 'error' = 'neutral') => {
     const id = Date.now().toString();
@@ -126,13 +127,35 @@ export default function DischargeQueuePage() {
                       </p>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => handleDischarge(p.id, p.name, p.roomNumber)}
-                      className="px-4 py-2.5 min-h-[42px] rounded bg-[#0f766e] text-white text-sm font-semibold hover:bg-[#0d625b] transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0f766e]"
-                    >
-                      Execute Discharge
-                    </button>
+                    {confirmingId === p.id ? (
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setConfirmingId(null)}
+                          className="px-3 py-2 min-h-[44px] rounded-lg border border-[#E7E5E0] bg-white text-xs font-medium text-[#1F2933] cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            handleDischarge(p.id, p.name, p.roomNumber);
+                            setConfirmingId(null);
+                          }}
+                          className="px-4 py-2 min-h-[44px] rounded-lg bg-[#1F6F6B] text-white text-xs font-semibold hover:bg-[#175552] cursor-pointer"
+                        >
+                          Confirm Discharge
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setConfirmingId(p.id)}
+                        className="px-4 py-2.5 min-h-[44px] rounded-lg bg-[#1F6F6B] text-white text-sm font-semibold hover:bg-[#175552] transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1F6F6B]"
+                      >
+                        Execute Discharge
+                      </button>
+                    )}
                   </div>
                 );
               })}

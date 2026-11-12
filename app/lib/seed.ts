@@ -292,55 +292,55 @@ export function generateSeedData(): AppState {
     }
   }
 
-  // ── Closed cases (discharged: rooms 75-79, deceased: rooms 80-81) ───────
+  // ── Closed cases: 18 discharged, 2 deceased (2/20 = 10.0% <= 15% benchmark)
 
-  for (let room = 75; room <= 79; room++) {
-    const id = `p-${room}`;
+  for (let i = 1; i <= 18; i++) {
+    const room = 74 + i;
+    const id = `p-closed-d-${i}`;
     const name = getName(room);
-    const admitDate = subtractDays(BASE_DATE, 10 + (room % 3));
-    const dischDate = subtractDays(BASE_DATE, 2 + (room % 2));
+    const admitDate = subtractDays(BASE_DATE, 10 + (i % 4));
+    const dischDate = subtractDays(BASE_DATE, 1 + (i % 3));
 
     patients.push({
       id,
       name,
-      roomNumber: room,
+      roomNumber: (i % 74) + 1,
       admissionDate: admitDate,
       status: 'discharged',
       dischargeDate: dischDate,
     });
 
-    // Generate some temperature history for these closed cases
-    for (let d = 0; d < 5; d++) {
+    for (let d = 0; d < 4; d++) {
       const date = subtractDays(dischDate, d);
       addReading(id, date, tempValue(room, d, false), pick(NURSE_NAMES, room + d, 3));
     }
 
-    addAudit('discharge_executed', id, name, room, 'Admin Raj', 'admin',
+    addAudit('discharge_executed', id, name, (i % 74) + 1, 'Admin Raj', 'admin',
       `Patient discharged on ${dischDate}.`, dischDate);
   }
 
-  for (let room = 80; room <= 81; room++) {
-    const id = `p-${room}`;
+  for (let i = 1; i <= 2; i++) {
+    const room = 94 + i;
+    const id = `p-closed-m-${i}`;
     const name = getName(room);
-    const admitDate = subtractDays(BASE_DATE, 12 + (room % 3));
-    const decDate = subtractDays(BASE_DATE, 3 + (room % 2));
+    const admitDate = subtractDays(BASE_DATE, 12 + (i % 3));
+    const decDate = subtractDays(BASE_DATE, 2 + i);
 
     patients.push({
       id,
       name,
-      roomNumber: room,
+      roomNumber: (i % 74) + 1,
       admissionDate: admitDate,
       status: 'deceased',
       deceasedDate: decDate,
     });
 
-    // Some temperature history
     for (let d = 0; d < 4; d++) {
       const date = subtractDays(decDate, d);
       addReading(id, date, tempValue(room, d, d < 2), pick(NURSE_NAMES, room + d, 5));
     }
 
-    addAudit('deceased_recorded', id, name, room, pick(DOCTOR_NAMES, room, 19), 'doctor',
+    addAudit('deceased_recorded', id, name, (i % 74) + 1, pick(DOCTOR_NAMES, room, 19), 'doctor',
       `Patient deceased on ${decDate}.`, decDate);
   }
 
@@ -352,4 +352,48 @@ export function generateSeedData(): AppState {
     auditLog,
     dischargeQueue,
   } as AppState;
+}
+
+export type ScenarioId = 'normal' | 'busy-morning' | 'high-mortality';
+
+export function generateScenarioData(scenario: ScenarioId): AppState {
+  const base = generateSeedData();
+  if (scenario === 'normal') return base;
+
+  if (scenario === 'busy-morning') {
+    // Keep rooms 1-14 as already measured; clear today's temps & visits for rooms 15-74
+    const clearedIds = new Set(
+      base.patients
+        .filter((p) => p.status === 'admitted' && p.roomNumber >= 15)
+        .map((p) => p.id),
+    );
+    return {
+      ...base,
+      temperatureReadings: base.temperatureReadings.filter(
+        (r) => !(clearedIds.has(r.patientId) && r.date === base.currentDate),
+      ),
+      doctorVisits: base.doctorVisits.filter(
+        (v) => !(clearedIds.has(v.patientId) && v.date === base.currentDate),
+      ),
+    };
+  }
+
+  // high-mortality: 16 discharged + 5 deceased = 5/21 (23.8% > 15% benchmark)
+  const extraDeceased = [3, 4, 5].map((i) => ({
+    id: `p-closed-m-${i}`,
+    name: `Patient Closed-${i}`,
+    roomNumber: i,
+    admissionDate: subtractDays(BASE_DATE, 11 + i),
+    status: 'deceased' as const,
+    deceasedDate: subtractDays(BASE_DATE, i),
+  }));
+
+  const trimmedPatients = base.patients.filter(
+    (p) => p.id !== 'p-closed-d-17' && p.id !== 'p-closed-d-18',
+  );
+
+  return {
+    ...base,
+    patients: [...trimmedPatients, ...extraDeceased],
+  };
 }

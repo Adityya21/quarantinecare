@@ -4,11 +4,17 @@
   --font-serif: var(--font-serif), Georgia, serif;
   --font-sans: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-paper: #FAFAF8;
+  --color-ink: #1F2933;
+  --color-muted: #6B7680;
+  --color-hairline: #E7E5E0;
+  --color-accent: #1F6F6B;
 }
 
 :root {
-  --background: #fafaf7;
-  --foreground: #141413;
+  --background: #FAFAF8;
+  --foreground: #1F2933;
 }
 
 body {
@@ -31,4 +37,29 @@ body {
   line-height: 16px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  @page {
+    size: landscape;
+    margin: 10mm;
+  }
 }

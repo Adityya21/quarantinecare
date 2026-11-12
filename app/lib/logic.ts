@@ -136,6 +136,61 @@ export function isEligibleForDischarge(
   return calculateFeverFreeStreak(readings, currentDate) >= FEVER_FREE_DAYS_FOR_DISCHARGE;
 }
 
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+function formatShortDay(dateStr: string): string {
+  const parts = dateStr.split('-').map(Number);
+  if (parts.length !== 3) return dateStr;
+  const [, m, d] = parts;
+  return `${d} ${MONTH_NAMES[(m - 1) % 12] ?? ''}`;
+}
+
+/**
+ * Return one plain sentence explaining why the patient is or is not eligible
+ * for discharge, computed directly from their temperature history.
+ */
+export function getEligibilityExplainer(
+  readings: TemperatureReading[],
+  currentDate: string,
+  unit: 'C' | 'F' = 'C',
+): string {
+  if (readings.length === 0) {
+    return 'No temperature readings recorded yet.';
+  }
+
+  const tempByDate = new Map<string, number>();
+  for (const r of readings) {
+    tempByDate.set(r.date, r.temperature);
+  }
+
+  const streak = calculateFeverFreeStreak(readings, currentDate);
+  if (streak >= FEVER_FREE_DAYS_FOR_DISCHARGE) {
+    return `Eligible for discharge: ${streak} consecutive fever-free days.`;
+  }
+
+  // Find the first day backwards from currentDate that broke the streak
+  let day = currentDate;
+  for (let i = 0; i < streak; i++) {
+    day = getPreviousDay(day);
+  }
+
+  const breakingTemp = tempByDate.get(day);
+  if (breakingTemp === undefined) {
+    if (streak === 0 && day === currentDate) {
+      return `Needs ${FEVER_FREE_DAYS_FOR_DISCHARGE} consecutive fever-free days. Today's reading is pending.`;
+    }
+    return `Missing reading on ${formatShortDay(day)} breaks the streak. Needs ${FEVER_FREE_DAYS_FOR_DISCHARGE - streak} more fever-free ${FEVER_FREE_DAYS_FOR_DISCHARGE - streak === 1 ? 'day' : 'days'}.`;
+  }
+
+  if (hasFever(breakingTemp)) {
+    const val = unit === 'F' ? `${celsiusToFahrenheit(breakingTemp).toFixed(1)} °F` : `${breakingTemp.toFixed(1)} °C`;
+    return `Streak reset: fever of ${val} on ${formatShortDay(day)}.`;
+  }
+
+  const remaining = FEVER_FREE_DAYS_FOR_DISCHARGE - streak;
+  return `Needs ${remaining} more fever-free ${remaining === 1 ? 'day' : 'days'}.`;
+}
+
 // ──────────────────────────────────────────────────────────────────────────────
 // Outcome statistics
 // ──────────────────────────────────────────────────────────────────────────────
