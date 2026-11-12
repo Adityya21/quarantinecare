@@ -35,7 +35,7 @@ export default function SiteFooter({ onQuickTour }: SiteFooterProps) {
               aria-label="QuarantineCare home"
               className="inline-flex items-center gap-[10px] rounded focus:outline-none focus:ring-2 focus:ring-[#8FD3CC] focus:ring-offset-2 focus:ring-offset-[#0F2E2D]"
             >
-              <BrandLogo size={20} />
+              <BrandLogo size={22} />
               <span className="font-serif-heading text-[20px] leading-none font-semibold text-[#F4F3EE]">
                 QuarantineCare
               </span>

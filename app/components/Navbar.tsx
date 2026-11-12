@@ -102,7 +102,7 @@ export default function Navbar({ mode, onQuickTour }: NavbarProps) {
             aria-label="QuarantineCare home"
             className={`inline-flex items-center gap-[10px] shrink-0 rounded py-1 ${focusDark}`}
           >
-            <BrandLogo size={20} />
+            <BrandLogo size={22} />
             <span className="font-serif-heading text-[20px] leading-none font-semibold text-[#F4F3EE]">
               QuarantineCare
             </span>
