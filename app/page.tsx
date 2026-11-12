@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/app/lib/context';
 import type { Role } from '@/app/lib/types';
@@ -37,7 +36,7 @@ const roles: {
 
 export default function RoleSelectPage() {
   const router = useRouter();
-  const { setRole, resetData } = useApp();
+  const { setRole } = useApp();
 
   const handleSelectRole = (selected: Role) => {
     setRole(selected);
@@ -90,31 +89,6 @@ export default function RoleSelectPage() {
             </button>
           ))}
         </section>
-
-        {/* Footer Controls */}
-        <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-[#e2e0d8] text-xs text-[#5c5b57]">
-          <p>
-            Demo prototype with localStorage persistence. Real authentication and role-based SSO are deferred to post-MVP.
-          </p>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/submission"
-              className="px-3 py-2 rounded border border-[#e2e0d8] bg-white text-[#141413] font-medium hover:border-[#0f766e] transition-colors"
-            >
-              Assessment Submission &amp; Rules
-            </Link>
-            <button
-              type="button"
-              onClick={() => {
-                resetData();
-                router.refresh();
-              }}
-              className="px-3 py-2 rounded border border-[#e2e0d8] bg-white text-[#991b1b] font-medium hover:border-[#b91c1c] transition-colors cursor-pointer"
-            >
-              Reset Demo Data
-            </button>
-          </div>
-        </div>
       </main>
     </div>
   );
