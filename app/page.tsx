@@ -149,89 +149,144 @@ export default function RoleSelectPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fafaf7] flex flex-col justify-center px-4 py-8 sm:py-12">
-      <main className="max-w-5xl mx-auto w-full space-y-8 -mt-2 sm:-mt-4">
-        {/* Header */}
-        <header className="space-y-2 border-b border-[#e2e0d8] pb-5">
+    <div className="min-h-screen bg-[#fafaf7] flex flex-col">
+      {/* Proper Top Header Bar */}
+      <header className="bg-white border-b border-[#e2e0d8]">
+        <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <span className="inline-block w-2.5 h-2.5 bg-[#0f766e] rounded-xs" aria-hidden="true" />
-            <span className="caption-label text-[#5c5b57] font-semibold">
-              74-Bed Quarantine &amp; Treatment Facility
+            <span className="font-serif-heading text-lg font-semibold text-[#141413]">
+              QuarantineCare
             </span>
           </div>
-          <h1 className="font-serif-heading text-3xl sm:text-[36px] font-semibold text-[#141413] leading-tight">
-            QuarantineCare
-          </h1>
-          <p className="text-sm sm:text-base text-[#5c5b57] max-w-2xl">
-            Daily temperature tracking, doctor visits and discharge readiness for a 74-room quarantine facility.
-          </p>
-        </header>
-
-        {/* Three Equal-Height Role Cards */}
-        <section
-          aria-label="Select role"
-          className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch"
-        >
-          {roles.map((item) => (
-            <button
-              key={item.role}
-              type="button"
-              onClick={() => handleSelectRole(item.role)}
-              className="group bg-white border border-[#e2e0d8] hover:border-[#0f766e] rounded-lg p-6 text-left transition-colors duration-150 grid grid-rows-[auto_auto_1fr_auto] gap-y-2.5 h-full cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0f766e]"
+          <div className="flex items-center gap-4">
+            <span className="caption-label text-[#5c5b57] hidden sm:inline">
+              74-Bed Quarantine Facility
+            </span>
+            <Link
+              href="/how-it-works"
+              className="text-xs font-medium text-[#0f766e] hover:underline rounded focus:outline-none focus:ring-2 focus:ring-[#0f766e]"
             >
-              <span className="caption-label text-[#0f766e] font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
-                {item.eyebrow}
-              </span>
+              How it works
+            </Link>
+          </div>
+        </div>
+      </header>
 
-              <h2 className="font-serif-heading text-2xl font-semibold text-[#141413]">
-                {item.title}
-              </h2>
-
-              <p className="text-sm text-[#5c5b57] leading-relaxed">
-                {item.description}
-              </p>
-
-              <span className="inline-flex items-center gap-1 pt-2 text-sm font-semibold text-[#0f766e]">
-                <span>Enter as {item.title}</span>
-                <span
-                  aria-hidden="true"
-                  className="inline-block transition-transform duration-150 group-hover:translate-x-[2px]"
-                >
-                  &rarr;
-                </span>
-              </span>
-            </button>
-          ))}
-        </section>
-
-        {/* Non-interactive Ward Board Preview (hidden below 480px) */}
-        <section
-          aria-hidden="true"
-          className="hidden min-[480px]:block bg-white border border-[#e2e0d8] rounded-lg p-4 space-y-2.5 pointer-events-none select-none"
-        >
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:min-h-[112px]">
-            {/* Wing 1: Rooms 1-37 */}
-            <div className="flex-1 flex flex-wrap gap-1 content-center">
-              {Array.from({ length: 37 }, (_, i) => renderPreviewCell(i + 1))}
-            </div>
-
-            {/* Thin corridor line */}
-            <div className="h-[1px] w-full md:w-[1px] md:h-24 bg-[#e2e0d8] shrink-0" />
-
-            {/* Wing 2: Rooms 38-74 */}
-            <div className="flex-1 flex flex-wrap gap-1 content-center">
-              {Array.from({ length: 37 }, (_, i) => renderPreviewCell(i + 38))}
-            </div>
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col justify-center px-4 py-8 sm:py-10">
+        <div className="max-w-5xl mx-auto w-full space-y-7">
+          {/* Hero */}
+          <div className="space-y-2">
+            <h1 className="font-serif-heading text-3xl sm:text-[36px] font-semibold text-[#141413] leading-tight">
+              QuarantineCare
+            </h1>
+            <p className="text-sm sm:text-base text-[#5c5b57] max-w-2xl">
+              Daily temperature tracking, doctor visits and discharge readiness for a 74-room quarantine facility.
+            </p>
           </div>
 
-          <p className="caption-label text-[#5c5b57] pt-1 border-t border-[#e2e0d8]">
-            Today&apos;s ward at a glance. Top half: temperature. Bottom half: doctor visit.
-          </p>
-        </section>
+          {/* Three Equal-Height Role Cards */}
+          <section
+            aria-label="Select role"
+            className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch"
+          >
+            {roles.map((item) => (
+              <button
+                key={item.role}
+                type="button"
+                onClick={() => handleSelectRole(item.role)}
+                className="group bg-white border border-[#e2e0d8] hover:border-[#0f766e] rounded-lg p-6 text-left transition-colors duration-150 grid grid-rows-[auto_auto_1fr_auto] gap-y-2.5 h-full cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0f766e]"
+              >
+                <span className="caption-label text-[#0f766e] font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
+                  {item.eyebrow}
+                </span>
 
-        {/* Footer Strip */}
-        <footer className="border-t border-[#e2e0d8] pt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-[#5c5b57]">
-          <span>Demo prototype. Sign-in is not implemented.</span>
+                <h2 className="font-serif-heading text-2xl font-semibold text-[#141413]">
+                  {item.title}
+                </h2>
+
+                <p className="text-sm text-[#5c5b57] leading-relaxed">
+                  {item.description}
+                </p>
+
+                <span className="inline-flex items-center gap-1 pt-2 text-sm font-semibold text-[#0f766e]">
+                  <span>Enter as {item.title}</span>
+                  <span
+                    aria-hidden="true"
+                    className="inline-block transition-transform duration-150 group-hover:translate-x-[2px]"
+                  >
+                    &rarr;
+                  </span>
+                </span>
+              </button>
+            ))}
+          </section>
+
+          {/* Non-interactive Ward Board Preview (hidden below 480px) */}
+          <section
+            aria-hidden="true"
+            className="hidden min-[480px]:block bg-white border border-[#e2e0d8] rounded-lg p-4 space-y-2.5 pointer-events-none select-none"
+          >
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:min-h-[112px]">
+              {/* Wing 1: Rooms 1-37 */}
+              <div className="flex-1 flex flex-wrap gap-1 content-center">
+                {Array.from({ length: 37 }, (_, i) => renderPreviewCell(i + 1))}
+              </div>
+
+              {/* Thin corridor line */}
+              <div className="h-[1px] w-full md:w-[1px] md:h-24 bg-[#e2e0d8] shrink-0" />
+
+              {/* Wing 2: Rooms 38-74 */}
+              <div className="flex-1 flex flex-wrap gap-1 content-center">
+                {Array.from({ length: 37 }, (_, i) => renderPreviewCell(i + 38))}
+              </div>
+            </div>
+
+            <p className="caption-label text-[#5c5b57] pt-1 border-t border-[#e2e0d8]">
+              Today&apos;s ward at a glance. Top half: temperature. Bottom half: doctor visit.
+            </p>
+          </section>
+
+          {/* Dismissible Reviewer Guide (first visit) */}
+          {showTour && (
+            <section
+              aria-label="Quick tour"
+              className="bg-white border border-[#e2e0d8] rounded-lg p-4 space-y-2.5 text-xs text-[#5c5b57]"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="font-semibold text-[#141413]">Quick tour (60 seconds)</h2>
+                <button
+                  type="button"
+                  onClick={dismissTour}
+                  className="px-2.5 py-1 rounded border border-[#e2e0d8] text-xs font-medium text-[#5c5b57] hover:text-[#141413] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0f766e]"
+                >
+                  Dismiss
+                </button>
+              </div>
+              <ol className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 list-none">
+                <li className="p-2 rounded bg-[#fafaf7] border border-[#e2e0d8]">
+                  1. Enter as Nurse and record a temperature.
+                </li>
+                <li className="p-2 rounded bg-[#fafaf7] border border-[#e2e0d8]">
+                  2. Enter as Doctor and log a visit.
+                </li>
+                <li className="p-2 rounded bg-[#fafaf7] border border-[#e2e0d8]">
+                  3. Advance the day with the demo control in settings.
+                </li>
+                <li className="p-2 rounded bg-[#fafaf7] border border-[#e2e0d8]">
+                  4. Enter as Admin and discharge an eligible patient.
+                </li>
+              </ol>
+            </section>
+          )}
+        </div>
+      </main>
+
+      {/* Proper Distinct Bottom Footer Bar */}
+      <footer className="bg-white border-t border-[#e2e0d8]">
+        <div className="max-w-5xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-3 text-xs text-[#5c5b57]">
+          <span>QuarantineCare &bull; Demo prototype. Sign-in is not implemented.</span>
           <div className="flex items-center gap-4">
             {!showTour && (
               <button
@@ -249,41 +304,8 @@ export default function RoleSelectPage() {
               How it works
             </Link>
           </div>
-        </footer>
-
-        {/* Dismissible Reviewer Guide (first visit) */}
-        {showTour && (
-          <section
-            aria-label="Quick tour"
-            className="bg-white border border-[#e2e0d8] rounded-lg p-4 space-y-2.5 text-xs text-[#5c5b57]"
-          >
-            <div className="flex items-center justify-between gap-2">
-              <h2 className="font-semibold text-[#141413]">Quick tour (60 seconds)</h2>
-              <button
-                type="button"
-                onClick={dismissTour}
-                className="px-2.5 py-1 rounded border border-[#e2e0d8] text-xs font-medium text-[#5c5b57] hover:text-[#141413] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0f766e]"
-              >
-                Dismiss
-              </button>
-            </div>
-            <ol className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 list-none">
-              <li className="p-2 rounded bg-[#fafaf7] border border-[#e2e0d8]">
-                1. Enter as Nurse and record a temperature.
-              </li>
-              <li className="p-2 rounded bg-[#fafaf7] border border-[#e2e0d8]">
-                2. Enter as Doctor and log a visit.
-              </li>
-              <li className="p-2 rounded bg-[#fafaf7] border border-[#e2e0d8]">
-                3. Advance the day with the demo control in settings.
-              </li>
-              <li className="p-2 rounded bg-[#fafaf7] border border-[#e2e0d8]">
-                4. Enter as Admin and discharge an eligible patient.
-              </li>
-            </ol>
-          </section>
-        )}
-      </main>
+        </div>
+      </footer>
     </div>
   );
 }
