@@ -82,10 +82,6 @@ export default function Navbar() {
                     </Link>
                   </>
                 )}
-
-                <Link href="/submission" className={navLinkClass('/submission')}>
-                  Submission
-                </Link>
               </nav>
             </div>
 
@@ -204,15 +200,6 @@ export default function Navbar() {
             </Link>
           </>
         )}
-
-        <Link
-          href="/submission"
-          className={`px-2.5 py-2 rounded text-xs font-medium min-h-[40px] flex items-center ${
-            pathname === '/submission' ? 'text-[#0f766e] font-semibold' : 'text-[#5c5b57]'
-          }`}
-        >
-          Submission
-        </Link>
       </nav>
     </>
   );
