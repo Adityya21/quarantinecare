@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
 import Navbar from '@/app/components/Navbar';
 import SiteFooter from '@/app/components/SiteFooter';
+import DemoLoginModal from '@/app/components/DemoLoginModal';
 import Toast, { type ToastMessage } from '@/app/components/Toast';
 import { useApp } from '@/app/lib/context';
 import {
@@ -34,6 +35,8 @@ export default function RoleSelectPage() {
 
   const [showTour, setShowTour] = useState(false);
   const [toast, setToast] = useState<ToastMessage | null>(null);
+  const [pendingRole, setPendingRole] = useState<Role | null>(null);
+  const [pendingRedirect, setPendingRedirect] = useState<string>('/dashboard');
 
   const notify = (text: string, tone: 'neutral' | 'success' | 'error' = 'success') => {
     const id = Date.now().toString();
@@ -72,9 +75,15 @@ export default function RoleSelectPage() {
     }
   };
 
-  const handleSelectRole = (selected: Role) => {
-    setRole(selected);
-    router.push('/dashboard');
+  const handleSelectRole = (selected: Role, targetRoute = '/dashboard') => {
+    setPendingRedirect(targetRoute);
+    setPendingRole(selected);
+  };
+
+  const handleLoginSuccess = (authedRole: Role) => {
+    setRole(authedRole);
+    setPendingRole(null);
+    router.push(pendingRedirect);
   };
 
   const occupancy = getOccupancy();
@@ -427,10 +436,7 @@ export default function RoleSelectPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    setRole('admin');
-                    router.push('/discharge');
-                  }}
+                  onClick={() => handleSelectRole('admin', '/discharge')}
                   className="p-3 rounded-lg bg-[#FAFAF8] border border-[#E7E5E0] hover:border-[#1F6F6B] text-left cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1F6F6B]"
                 >
                   <strong className="text-[#1F2933]">4. Discharge as Admin</strong>
@@ -443,6 +449,12 @@ export default function RoleSelectPage() {
       </main>
 
       <SiteFooter onQuickTour={openQuickTour} />
+
+      <DemoLoginModal
+        role={pendingRole}
+        onClose={() => setPendingRole(null)}
+        onSuccess={handleLoginSuccess}
+      />
 
       <Toast toast={toast} onDismiss={() => setToast(null)} />
     </div>

@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import BrandLogo from './BrandLogo';
+import DemoLoginModal from './DemoLoginModal';
 import { useApp } from '@/app/lib/context';
 import type { Role } from '@/app/lib/types';
 
@@ -14,9 +15,15 @@ interface SiteFooterProps {
 export default function SiteFooter({ onQuickTour }: SiteFooterProps) {
   const router = useRouter();
   const { setRole } = useApp();
+  const [pendingRole, setPendingRole] = useState<Role | null>(null);
 
   const enterAs = (role: Role) => {
-    setRole(role);
+    setPendingRole(role);
+  };
+
+  const handleLoginSuccess = (authedRole: Role) => {
+    setRole(authedRole);
+    setPendingRole(null);
     router.push('/dashboard');
   };
 
@@ -122,6 +129,12 @@ export default function SiteFooter({ onQuickTour }: SiteFooterProps) {
           <span className="font-mono tabular-nums">Version 0.1</span>
         </div>
       </div>
+
+      <DemoLoginModal
+        role={pendingRole}
+        onClose={() => setPendingRole(null)}
+        onSuccess={handleLoginSuccess}
+      />
     </footer>
   );
 }
