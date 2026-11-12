@@ -4,7 +4,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
-import BrandLogo from '@/app/components/BrandLogo';
+import Navbar from '@/app/components/Navbar';
+import SiteFooter from '@/app/components/SiteFooter';
 import Toast, { type ToastMessage } from '@/app/components/Toast';
 import { useApp } from '@/app/lib/context';
 import {
@@ -188,41 +189,20 @@ export default function RoleSelectPage() {
     );
   };
 
+  const openQuickTour = () => {
+    restoreTour();
+    setTimeout(() => {
+      document.getElementById('quick-tour')?.scrollIntoView({ behavior: 'smooth' });
+    }, 50);
+  };
+
   return (
     <div className="min-h-screen bg-[#FAFAF8] text-[#1F2933] flex flex-col">
-      {/* Top Bar */}
-      <header className="bg-white border-b border-[#E7E5E0]">
-        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5">
-            <BrandLogo size={26} />
-            <span className="font-serif-heading text-lg font-semibold text-[#1F2933]">
-              QuarantineCare
-            </span>
-          </div>
-          <nav aria-label="Landing navigation" className="flex items-center gap-4 text-xs font-medium">
-            <Link
-              href="/how-it-works"
-              className="text-[#1F6F6B] hover:underline py-2 px-1 rounded focus:outline-none focus:ring-2 focus:ring-[#1F6F6B]"
-            >
-              How it works
-            </Link>
-            <button
-              type="button"
-              onClick={() => {
-                restoreTour();
-                document.getElementById('quick-tour')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="text-[#6B7680] hover:text-[#1F2933] py-2 px-1 rounded cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1F6F6B]"
-            >
-              Quick tour
-            </button>
-          </nav>
-        </div>
-      </header>
+      <Navbar mode="public" onQuickTour={openQuickTour} />
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col justify-center px-4 py-8 sm:py-10">
-        <div className="max-w-6xl mx-auto w-full space-y-8">
+      {/* Main Content (pt-12 = 48px spacing under dark chrome bar, max-w-[1120px] aligned with header/footer) */}
+      <main id="main-content" className="flex-1 flex flex-col justify-center px-4 pt-12 pb-10">
+        <div className="max-w-[1120px] mx-auto w-full space-y-8">
           {/* Two-Column Hero */}
           <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] gap-6 items-center">
             <div className="space-y-3">
@@ -449,29 +429,7 @@ export default function RoleSelectPage() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-white border-t border-[#E7E5E0]">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-3 text-xs text-[#6B7680]">
-          <span>Demo prototype. Sign-in is not implemented.</span>
-          <div className="flex items-center gap-4">
-            {!showTour && (
-              <button
-                type="button"
-                onClick={restoreTour}
-                className="text-[#6B7680] hover:text-[#1F2933] underline cursor-pointer rounded focus:outline-none focus:ring-2 focus:ring-[#1F6F6B]"
-              >
-                Show tour again
-              </button>
-            )}
-            <Link
-              href="/how-it-works"
-              className="text-[#1F6F6B] font-medium hover:underline rounded focus:outline-none focus:ring-2 focus:ring-[#1F6F6B]"
-            >
-              How it works
-            </Link>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter onQuickTour={openQuickTour} />
 
       <Toast toast={toast} onDismiss={() => setToast(null)} />
     </div>

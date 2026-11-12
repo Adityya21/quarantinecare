@@ -290,7 +290,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-[#FAFAF8] text-[#1F2933] pb-20 md:pb-8">
       <Navbar />
 
-      <main className="no-print max-w-[1440px] mx-auto px-4 py-5 space-y-5">
+      <main id="main-content" className="no-print max-w-[1120px] mx-auto px-4 py-6 space-y-5">
         {/* Critical Mortality > 15% Alert Banner */}
         {outcomes.isAboveBenchmark && (
           <div

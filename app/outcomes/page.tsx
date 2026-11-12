@@ -52,7 +52,7 @@ export default function OutcomesPage() {
     <div className="min-h-screen bg-[#fafaf7] pb-20 md:pb-8">
       <Navbar />
 
-      <main className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+      <main id="main-content" className="max-w-[1120px] mx-auto px-4 py-6 space-y-6">
         <header className="space-y-1">
           <span className="caption-label text-[#5c5b57] font-semibold">
             Clinical Performance &amp; Quality Benchmark

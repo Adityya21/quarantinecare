@@ -23,7 +23,7 @@ function PatientStandaloneContent() {
   return (
     <div className="min-h-screen bg-[#fafaf7] pb-20 md:pb-8">
       <Navbar />
-      <main className="max-w-3xl mx-auto px-4 py-6 space-y-4">
+      <main id="main-content" className="max-w-[1120px] mx-auto px-4 py-6 space-y-4">
         <Link
           href="/dashboard"
           className="inline-flex items-center text-xs font-semibold text-[#0f766e] hover:underline"

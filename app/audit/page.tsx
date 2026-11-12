@@ -67,7 +67,7 @@ export default function AuditLogPage() {
     <div className="min-h-screen bg-[#fafaf7] pb-20 md:pb-8">
       <Navbar />
 
-      <main className="max-w-5xl mx-auto px-4 py-6 space-y-5">
+      <main id="main-content" className="max-w-[1120px] mx-auto px-4 py-6 space-y-5">
         <header className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <span className="caption-label text-[#5c5b57] font-semibold">

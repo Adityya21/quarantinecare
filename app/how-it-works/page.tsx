@@ -1,11 +1,9 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import BrandLogo from '@/app/components/BrandLogo';
 import Navbar from '@/app/components/Navbar';
-import { useApp } from '@/app/lib/context';
+import SiteFooter from '@/app/components/SiteFooter';
 
 const FLOW_STEPS = [
   'Nurse records temperature',
@@ -19,33 +17,11 @@ const FLOW_STEPS = [
 ];
 
 export default function HowItWorksPage() {
-  const { role } = useApp();
-
   return (
-    <div className="min-h-screen bg-[#FAFAF8] text-[#1F2933] pb-20 md:pb-8">
-      {role ? (
-        <Navbar />
-      ) : (
-        <header className="bg-white border-b border-[#E7E5E0]">
-          <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-            <Link
-              href="/"
-              className="flex items-center gap-2.5 text-[#1F2933] font-serif-heading text-lg font-semibold"
-            >
-              <BrandLogo size={26} />
-              <span>QuarantineCare</span>
-            </Link>
-            <Link
-              href="/"
-              className="text-xs font-semibold text-[#1F6F6B] hover:underline"
-            >
-              Back to role selection
-            </Link>
-          </div>
-        </header>
-      )}
+    <div className="min-h-screen bg-[#FAFAF8] text-[#1F2933] flex flex-col">
+      <Navbar />
 
-      <main className="max-w-5xl mx-auto px-4 py-8 space-y-8">
+      <main id="main-content" className="flex-1 max-w-[1120px] mx-auto w-full px-4 pt-12 pb-12 space-y-8">
         <header className="space-y-1.5 border-b border-[#E7E5E0] pb-5">
           <span className="caption-label text-[#1F6F6B] font-semibold">
             Product Guide &amp; Clinical Rules
@@ -148,6 +124,8 @@ export default function HowItWorksPage() {
           </ul>
         </section>
       </main>
+
+      <SiteFooter />
     </div>
   );
 }

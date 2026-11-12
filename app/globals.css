@@ -10,6 +10,13 @@
   --color-muted: #6B7680;
   --color-hairline: #E7E5E0;
   --color-accent: #1F6F6B;
+
+  --color-chrome: #0F2E2D;
+  --color-chrome-raised: #163F3D;
+  --color-chrome-border: rgba(244, 243, 238, 0.12);
+  --color-chrome-text: #F4F3EE;
+  --color-chrome-muted: #A9C2BF;
+  --color-chrome-accent: #8FD3CC;
 }
 
 :root {
