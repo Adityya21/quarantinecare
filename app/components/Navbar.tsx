@@ -2,13 +2,14 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useApp } from '@/app/lib/context';
 import { formatDate } from '@/app/lib/logic';
 import type { Role } from '@/app/lib/types';
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const {
     role,
     setRole,
@@ -19,7 +20,9 @@ export default function Navbar() {
     getDischargeEligible,
   } = useApp();
 
-  const currentRole: Role = role ?? 'nurse';
+  if (!role) return null;
+
+  const currentRole: Role = role;
   const eligibleCount = getDischargeEligible().length;
   const dischargeBadgeCount = Math.max(eligibleCount, state.dischargeQueue.length);
 
@@ -32,11 +35,16 @@ export default function Navbar() {
     }`;
   };
 
-  const roles: { key: Role; label: string }[] = [
-    { key: 'nurse', label: 'Nurse' },
-    { key: 'doctor', label: 'Doctor' },
-    { key: 'admin', label: 'Admin' },
-  ];
+  const roleLabel: Record<Role, string> = {
+    nurse: 'Nurse',
+    doctor: 'Doctor',
+    admin: 'Admin',
+  };
+
+  const handleLogout = () => {
+    setRole(null);
+    router.push('/');
+  };
 
   return (
     <>
@@ -85,38 +93,14 @@ export default function Navbar() {
               </nav>
             </div>
 
-            {/* Right: Persistent Switch Role + Demo Date + Unit Toggle */}
+            {/* Right: Current Role Badge + Demo Date + Unit Toggle + Log out */}
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-              {/* Switch role segmented control */}
-              <div className="flex items-center gap-1.5">
-                <span className="caption-label text-[#5c5b57] hidden xl:inline">
-                  Switch role
-                </span>
-                <div
-                  role="group"
-                  aria-label="Switch role"
-                  className="inline-flex rounded border border-[#e2e0d8] bg-[#fafaf7] p-0.5"
-                >
-                  {roles.map((r) => {
-                    const active = role === r.key;
-                    return (
-                      <button
-                        key={r.key}
-                        type="button"
-                        onClick={() => setRole(r.key)}
-                        aria-pressed={active}
-                        className={`px-2.5 py-1 text-xs font-medium rounded-xs transition-colors duration-150 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0f766e] ${
-                          active
-                            ? 'bg-[#141413] text-white'
-                            : 'text-[#5c5b57] hover:text-[#141413]'
-                        }`}
-                      >
-                        {r.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+              <span
+                className="px-2.5 py-1 text-xs font-semibold rounded border border-[#e2e0d8] bg-[#fafaf7] text-[#141413]"
+                title="Active session role"
+              >
+                {roleLabel[currentRole]}
+              </span>
 
               {/* Simulated date + Demo Next Day */}
               <div className="flex items-center gap-1.5 border-l border-[#e2e0d8] pl-2 sm:pl-3">
@@ -144,6 +128,15 @@ export default function Navbar() {
                 className="font-mono tabular-nums px-2.5 py-1.5 min-h-[32px] text-xs font-medium rounded border border-[#e2e0d8] bg-[#fafaf7] text-[#141413] hover:bg-[#f1efe8] transition-colors duration-150 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0f766e]"
               >
                 &deg;{temperatureUnit}
+              </button>
+
+              {/* Log out */}
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="px-2.5 py-1.5 min-h-[32px] text-xs font-medium rounded border border-[#e2e0d8] bg-white text-[#991b1b] hover:border-[#b91c1c] transition-colors duration-150 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0f766e]"
+              >
+                Log out
               </button>
             </div>
           </div>

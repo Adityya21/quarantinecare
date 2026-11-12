@@ -23,7 +23,6 @@ export default function DashboardPage() {
   const {
     state,
     role,
-    setRole,
     temperatureUnit,
     advanceDay,
     getOccupancy,
@@ -55,8 +54,12 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    if (role) setLens(role);
-  }, [role]);
+    if (!role) {
+      router.push('/');
+    } else {
+      setLens(role);
+    }
+  }, [role, router]);
 
   const notify = (text: string, tone: 'neutral' | 'success' | 'error' = 'neutral') => {
     const id = Date.now().toString();
@@ -269,6 +272,8 @@ export default function DashboardPage() {
     );
   };
 
+  if (!role) return null;
+
   return (
     <div className="min-h-screen bg-[#fafaf7] pb-20 md:pb-8">
       <Navbar />
@@ -311,7 +316,7 @@ export default function DashboardPage() {
                   Quick Tour (60 Seconds)
                 </span>
                 <p className="text-xs text-[#5c5b57] mt-0.5">
-                  Walk through the four daily steps using the deep links below or the Switch Role bar above.
+                  Daily facility workflow across roles. Use Log out in the top bar to sign in as another role.
                 </p>
               </div>
               <button
@@ -324,33 +329,17 @@ export default function DashboardPage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-xs">
-              <button
-                type="button"
-                onClick={() => {
-                  setRole('nurse');
-                  setLens('nurse');
-                  setRoundOpen(true);
-                }}
-                className="p-2.5 rounded border border-[#e2e0d8] bg-[#fafaf7] hover:border-[#0f766e] text-left transition-colors cursor-pointer"
-              >
+              <div className="p-2.5 rounded border border-[#e2e0d8] bg-[#fafaf7]">
                 <span className="font-mono font-bold text-[#0f766e]">1.</span>{' '}
-                <span className="font-semibold text-[#141413]">Record a temperature as Nurse</span>
-                <span className="block text-[#5c5b57] mt-0.5">Opens Nurse Round Mode</span>
-              </button>
+                <span className="font-semibold text-[#141413]">Nurse records temperature</span>
+                <span className="block text-[#5c5b57] mt-0.5">Unlocks Doctor visit for that room</span>
+              </div>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setRole('doctor');
-                  setLens('doctor');
-                  notify('Doctor lens active. Highlighted rooms have a temp and await a visit.', 'neutral');
-                }}
-                className="p-2.5 rounded border border-[#e2e0d8] bg-[#fafaf7] hover:border-[#0f766e] text-left transition-colors cursor-pointer"
-              >
+              <div className="p-2.5 rounded border border-[#e2e0d8] bg-[#fafaf7]">
                 <span className="font-mono font-bold text-[#0f766e]">2.</span>{' '}
-                <span className="font-semibold text-[#141413]">Log a visit as Doctor</span>
-                <span className="block text-[#5c5b57] mt-0.5">Applies Doctor Ward Lens</span>
-              </button>
+                <span className="font-semibold text-[#141413]">Doctor logs visit &amp; notes</span>
+                <span className="block text-[#5c5b57] mt-0.5">Confirms discharge when streak &ge; 3</span>
+              </div>
 
               <button
                 type="button"
@@ -362,21 +351,14 @@ export default function DashboardPage() {
               >
                 <span className="font-mono font-bold text-[#0f766e]">3.</span>{' '}
                 <span className="font-semibold text-[#141413]">Advance the day (demo)</span>
-                <span className="block text-[#5c5b57] mt-0.5">Test the 3-day streak rule</span>
+                <span className="block text-[#5c5b57] mt-0.5">Click to test the 3-day streak rule</span>
               </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setRole('admin');
-                  router.push('/discharge');
-                }}
-                className="p-2.5 rounded border border-[#e2e0d8] bg-[#fafaf7] hover:border-[#0f766e] text-left transition-colors cursor-pointer"
-              >
+              <div className="p-2.5 rounded border border-[#e2e0d8] bg-[#fafaf7]">
                 <span className="font-mono font-bold text-[#0f766e]">4.</span>{' '}
-                <span className="font-semibold text-[#141413]">Discharge as Admin</span>
-                <span className="block text-[#5c5b57] mt-0.5">Opens Discharge Queue</span>
-              </button>
+                <span className="font-semibold text-[#141413]">Admin executes discharge</span>
+                <span className="block text-[#5c5b57] mt-0.5">Frees the room &amp; updates outcomes</span>
+              </div>
             </div>
           </section>
         )}
@@ -408,13 +390,10 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
-            {(role === 'nurse' || role === 'doctor' || !role) && (
+            {(role === 'nurse' || role === 'doctor') && (
               <button
                 type="button"
-                onClick={() => {
-                  if (!role) setRole('nurse');
-                  setRoundOpen(true);
-                }}
+                onClick={() => setRoundOpen(true)}
                 className="px-4 py-2.5 min-h-[42px] rounded bg-[#0f766e] text-white text-sm font-semibold hover:bg-[#0d625b] transition-colors duration-150 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0f766e]"
               >
                 Start round
