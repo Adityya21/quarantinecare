@@ -38,7 +38,7 @@ import { generateSeedData, generateScenarioData, type ScenarioId } from './seed'
 // localStorage helpers (SSR-safe)
 // ──────────────────────────────────────────────────────────────────────────────
 
-const STORAGE_KEY = 'quarantine-app-state';
+const STORAGE_KEY = 'quarantine-app-state-v2';
 
 function loadState(): AppState {
   if (typeof window === 'undefined') return generateSeedData();

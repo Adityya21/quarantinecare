@@ -21,6 +21,7 @@ export default function RoleSelectPage() {
     state,
     setRole,
     advanceDay,
+    resetData,
     getTodayReading,
     getTodayVisit,
     getPatientReadings,
@@ -221,9 +222,21 @@ export default function RoleSelectPage() {
             <div className="bg-white border border-[#E7E5E0] rounded-xl p-6 space-y-4">
               <div className="flex items-center justify-between border-b border-[#E7E5E0] pb-2.5">
                 <span className="caption-label text-[#6B7680] font-semibold">Today Snapshot</span>
-                <span className="font-mono tabular-nums text-xs text-[#6B7680]">
-                  {state.currentDate}
-                </span>
+                <div className="flex items-center gap-2.5">
+                  <span className="font-mono tabular-nums text-xs text-[#6B7680]">
+                    {state.currentDate}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      resetData();
+                      notify('Demo data restored to Day 1.', 'success');
+                    }}
+                    className="text-xs font-medium text-[#1F6F6B] hover:underline cursor-pointer rounded focus:outline-none focus:ring-2 focus:ring-[#1F6F6B]"
+                  >
+                    Reset
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-3">
