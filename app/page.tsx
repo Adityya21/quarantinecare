@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
 import BrandLogo from '@/app/components/BrandLogo';
+import Toast, { type ToastMessage } from '@/app/components/Toast';
 import { useApp } from '@/app/lib/context';
 import {
   MAX_CAPACITY,
@@ -30,6 +31,15 @@ export default function RoleSelectPage() {
   } = useApp();
 
   const [showTour, setShowTour] = useState(false);
+  const [toast, setToast] = useState<ToastMessage | null>(null);
+
+  const notify = (text: string, tone: 'neutral' | 'success' | 'error' = 'success') => {
+    const id = Date.now().toString();
+    setToast({ id, text, tone });
+    setTimeout(() => {
+      setToast((prev) => (prev?.id === id ? null : prev));
+    }, 3000);
+  };
 
   useEffect(() => {
     try {
@@ -411,11 +421,16 @@ export default function RoleSelectPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => advanceDay()}
+                  onClick={() => {
+                    advanceDay();
+                    notify('Simulated date advanced by 1 day.', 'success');
+                  }}
                   className="p-3 rounded-lg bg-[#FAFAF8] border border-[#E7E5E0] hover:border-[#1F6F6B] text-left cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1F6F6B]"
                 >
                   <strong className="text-[#1F2933]">3. Advance the day (demo)</strong>
-                  <span className="block mt-0.5">Simulates next calendar day</span>
+                  <span className="block mt-0.5 font-mono tabular-nums">
+                    Today: {state.currentDate} (click to advance)
+                  </span>
                 </button>
                 <button
                   type="button"
@@ -457,6 +472,8 @@ export default function RoleSelectPage() {
           </div>
         </div>
       </footer>
+
+      <Toast toast={toast} onDismiss={() => setToast(null)} />
     </div>
   );
 }
