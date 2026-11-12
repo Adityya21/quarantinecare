@@ -54,7 +54,8 @@ export default function Navbar() {
             {/* Left: Brand + Desktop Nav */}
             <div className="flex items-center gap-4">
               <Link
-                href="/dashboard"
+                href="/"
+                onClick={() => setRole(null)}
                 className="flex items-center gap-2 text-[#141413] font-serif-heading text-xl font-semibold tracking-tight focus:outline-none focus:ring-2 focus:ring-[#0f766e] rounded px-1"
               >
                 <span className="inline-block w-2.5 h-2.5 bg-[#0f766e] rounded-xs" aria-hidden="true" />
