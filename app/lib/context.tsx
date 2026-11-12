@@ -4,6 +4,7 @@ import React, {
   createContext,
   useContext,
   useState,
+  useEffect,
   useCallback,
   useMemo,
   type ReactNode,
@@ -143,9 +144,23 @@ const AppContext = createContext<AppContextValue | undefined>(undefined);
 // ──────────────────────────────────────────────────────────────────────────────
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<AppState>(loadState);
+  const [state, setState] = useState<AppState>(generateSeedData);
   const [role, setRoleRaw] = useState<Role | null>(null);
   const [temperatureUnit, setTemperatureUnitRaw] = useState<'C' | 'F'>('C');
+
+  // Hydrate persisted state & role after mount to avoid SSR hydration mismatches
+  useEffect(() => {
+    const hydrated = loadState();
+    setState(hydrated);
+    try {
+      const savedRole = localStorage.getItem('quarantine-app-role') as Role | null;
+      if (savedRole === 'nurse' || savedRole === 'doctor' || savedRole === 'admin') {
+        setRoleRaw(savedRole);
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }, []);
 
   // ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -166,7 +181,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // ── Role / unit setters ──────────────────────────────────────────────────
 
-  const setRole = useCallback((r: Role | null) => setRoleRaw(r), []);
+  const setRole = useCallback((r: Role | null) => {
+    setRoleRaw(r);
+    try {
+      if (r) {
+        localStorage.setItem('quarantine-app-role', r);
+      } else {
+        localStorage.removeItem('quarantine-app-role');
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }, []);
   const setTemperatureUnit = useCallback((u: 'C' | 'F') => setTemperatureUnitRaw(u), []);
 
   // ── Day management ───────────────────────────────────────────────────────
@@ -502,12 +528,38 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setState(fresh);
   }, []);
 
-  // ── Query helpers ────────────────────────────────────────────────────────
+  // ── Indexed O(1) query maps ───────────────────────────────────────────────
+
+  const readingsByPatientMap = useMemo(() => {
+    const map = new Map<string, TemperatureReading[]>();
+    for (const r of state.temperatureReadings) {
+      const list = map.get(r.patientId);
+      if (list) list.push(r);
+      else map.set(r.patientId, [r]);
+    }
+    return map;
+  }, [state.temperatureReadings]);
+
+  const todayReadingMap = useMemo(() => {
+    const map = new Map<string, TemperatureReading>();
+    for (const r of state.temperatureReadings) {
+      if (r.date === state.currentDate) map.set(r.patientId, r);
+    }
+    return map;
+  }, [state.temperatureReadings, state.currentDate]);
+
+  const todayVisitMap = useMemo(() => {
+    const map = new Map<string, DoctorVisit>();
+    for (const v of state.doctorVisits) {
+      if (v.date === state.currentDate) map.set(v.patientId, v);
+    }
+    return map;
+  }, [state.doctorVisits, state.currentDate]);
 
   const getPatientReadings = useCallback(
     (patientId: string): TemperatureReading[] =>
-      state.temperatureReadings.filter((r) => r.patientId === patientId),
-    [state.temperatureReadings],
+      readingsByPatientMap.get(patientId) ?? [],
+    [readingsByPatientMap],
   );
 
   const getPatientVisits = useCallback(
@@ -518,18 +570,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const getTodayReading = useCallback(
     (patientId: string): TemperatureReading | undefined =>
-      state.temperatureReadings.find(
-        (r) => r.patientId === patientId && r.date === state.currentDate,
-      ),
-    [state.temperatureReadings, state.currentDate],
+      todayReadingMap.get(patientId),
+    [todayReadingMap],
   );
 
   const getTodayVisit = useCallback(
     (patientId: string): DoctorVisit | undefined =>
-      state.doctorVisits.find(
-        (v) => v.patientId === patientId && v.date === state.currentDate,
-      ),
-    [state.doctorVisits, state.currentDate],
+      todayVisitMap.get(patientId),
+    [todayVisitMap],
   );
 
   const getOccupancy = useCallback(
