@@ -75,7 +75,7 @@ export default function Navbar({ mode, onQuickTour }: NavbarProps) {
     'focus:outline-none focus:ring-2 focus:ring-[#8FD3CC] focus:ring-offset-2 focus:ring-offset-[#0F2E2D]';
 
   const publicLinkClass = (active: boolean) =>
-    `text-sm transition-colors duration-150 rounded px-1 py-2 ${focusDark} ${
+    `text-xs sm:text-sm transition-colors duration-150 rounded px-1 py-2 whitespace-nowrap ${focusDark} ${
       active
         ? 'text-[#F4F3EE] underline decoration-[#8FD3CC] underline-offset-[6px]'
         : 'text-[#A9C2BF] hover:text-[#F4F3EE] hover:underline hover:decoration-[#8FD3CC] underline-offset-[6px]'
@@ -110,7 +110,7 @@ export default function Navbar({ mode, onQuickTour }: NavbarProps) {
 
           {/* Right side */}
           {isPublic ? (
-            <nav aria-label="Landing navigation" className="flex items-center gap-5 shrink-0">
+            <nav aria-label="Landing navigation" className="flex items-center gap-3 sm:gap-5 shrink-0">
               <Link
                 href="/how-it-works"
                 className={publicLinkClass(pathname === '/how-it-works')}
