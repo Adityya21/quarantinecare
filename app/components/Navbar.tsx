@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { SlidersHorizontal, LogOut, Calendar } from 'lucide-react';
+import BrandLogo from './BrandLogo';
 import { useApp } from '@/app/lib/context';
 import { formatDate } from '@/app/lib/logic';
 import type { Role } from '@/app/lib/types';
@@ -72,9 +73,9 @@ export default function Navbar() {
               <Link
                 href="/"
                 onClick={() => setRole(null)}
-                className="flex items-center gap-2 text-[#1F2933] font-serif-heading text-xl font-semibold tracking-tight focus:outline-none focus:ring-2 focus:ring-[#1F6F6B] rounded-lg px-1"
+                className="flex items-center gap-2.5 text-[#1F2933] font-serif-heading text-xl font-semibold tracking-tight focus:outline-none focus:ring-2 focus:ring-[#1F6F6B] rounded-lg px-1"
               >
-                <span className="inline-block w-2.5 h-2.5 bg-[#1F6F6B] rounded-xs" aria-hidden="true" />
+                <BrandLogo size={26} />
                 <span>QuarantineCare</span>
               </Link>
 

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
+import BrandLogo from '@/app/components/BrandLogo';
 import { useApp } from '@/app/lib/context';
 import {
   MAX_CAPACITY,
@@ -182,8 +183,8 @@ export default function RoleSelectPage() {
       {/* Top Bar */}
       <header className="bg-white border-b border-[#E7E5E0]">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="inline-block w-2.5 h-2.5 bg-[#1F6F6B] rounded-xs" aria-hidden="true" />
+          <div className="flex items-center gap-2.5">
+            <BrandLogo size={26} />
             <span className="font-serif-heading text-lg font-semibold text-[#1F2933]">
               QuarantineCare
             </span>

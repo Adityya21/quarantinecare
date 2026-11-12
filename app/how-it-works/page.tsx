@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
+import BrandLogo from '@/app/components/BrandLogo';
 import Navbar from '@/app/components/Navbar';
 import { useApp } from '@/app/lib/context';
 
@@ -29,9 +30,9 @@ export default function HowItWorksPage() {
           <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
             <Link
               href="/"
-              className="flex items-center gap-2 text-[#1F2933] font-serif-heading text-lg font-semibold"
+              className="flex items-center gap-2.5 text-[#1F2933] font-serif-heading text-lg font-semibold"
             >
-              <span className="inline-block w-2.5 h-2.5 bg-[#1F6F6B] rounded-xs" aria-hidden="true" />
+              <BrandLogo size={26} />
               <span>QuarantineCare</span>
             </Link>
             <Link
