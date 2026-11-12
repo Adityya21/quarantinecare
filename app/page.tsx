@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
 import Navbar from '@/app/components/Navbar';
 import SiteFooter from '@/app/components/SiteFooter';
+import WardCorridorBand from '@/app/components/WardCorridorBand';
 import DemoLoginModal from '@/app/components/DemoLoginModal';
 import Toast, { type ToastMessage } from '@/app/components/Toast';
 import { useApp } from '@/app/lib/context';
@@ -206,13 +207,25 @@ export default function RoleSelectPage() {
     }, 50);
   };
 
+  const scrollToRoleCards = () => {
+    const reduced =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const section = document.getElementById('role-cards');
+    section?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
+    const firstCard = document.getElementById('role-card-nurse');
+    setTimeout(() => {
+      firstCard?.focus({ preventScroll: true });
+    }, reduced ? 0 : 250);
+  };
+
   return (
     <div className="min-h-screen bg-[#FAFAF8] text-[#1F2933] flex flex-col">
       <Navbar mode="public" onQuickTour={openQuickTour} />
 
-      {/* Main Content (pt-12 = 48px spacing under dark chrome bar, max-w-[1120px] aligned with header/footer) */}
-      <main id="main-content" className="flex-1 flex flex-col justify-center px-4 pt-12 pb-10">
-        <div className="max-w-[1120px] mx-auto w-full space-y-8">
+      {/* Main Content (pt-12 = 48px spacing under dark chrome bar, pb-0 so WardCorridorBand sits flush against footer) */}
+      <main id="main-content" className="flex-1 flex flex-col justify-between pt-12 pb-0">
+        <div className="max-w-[1120px] mx-auto px-4 w-full space-y-8">
           {/* Two-Column Hero */}
           <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] gap-6 items-center">
             <div className="space-y-3">
@@ -295,12 +308,14 @@ export default function RoleSelectPage() {
 
           {/* Three Equal-Height Role Cards */}
           <section
+            id="role-cards"
             aria-label="Select role"
             className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch"
           >
             {roles.map((item) => (
               <button
                 key={item.role}
+                id={`role-card-${item.role}`}
                 type="button"
                 onClick={() => handleSelectRole(item.role)}
                 className="group bg-white border border-[#E7E5E0] hover:border-[#1F6F6B] rounded-xl p-6 text-left transition-colors duration-150 grid grid-rows-[auto_auto_auto_1fr_auto_auto] gap-y-2 h-full cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1F6F6B]"
@@ -446,6 +461,9 @@ export default function RoleSelectPage() {
             </section>
           )}
         </div>
+
+        {/* Full-width hospital corridor band sitting flush against the footer */}
+        <WardCorridorBand onChooseRole={scrollToRoleCards} />
       </main>
 
       <SiteFooter onQuickTour={openQuickTour} />
